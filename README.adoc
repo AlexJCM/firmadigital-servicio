@@ -14,7 +14,7 @@ Para compilar y empaquetar se utiliza http://maven.apache.org[Apache Maven].
 
 
 == Instalación
-Para compilar se utilizar Apache Maven:
+Para compilar se debe utilizar Apache Maven:
 
 [source, bash]
 ----

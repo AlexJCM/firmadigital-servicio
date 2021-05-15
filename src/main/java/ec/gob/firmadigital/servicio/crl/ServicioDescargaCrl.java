@@ -68,13 +68,13 @@ public class ServicioDescargaCrl {
     private static final Logger logger = Logger.getLogger(ServicioDescargaCrl.class.getName());
 
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
-  /*  @PostConstruct
+    /* @PostConstruct
     public void init() {
         crearTablaSiNoExiste();
         importarCrls();
     }*/
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
-/*
+
     @Schedule(minute = "0", hour = "*", persistent = false)
     public void importarCrls() {
         logger.info("Iniciando el proceso de descarga de CRL");
@@ -103,6 +103,15 @@ public class ServicioDescargaCrl {
         logger.info("Descargando CRL de ANFAC...");
         X509CRL anfAcCrl = downloadCrl(ServicioCRL.ANFAC_CRL);
 
+        logger.info("Descargando CRL de DIGERCIC...");
+        X509CRL digercicCrl = downloadCrl(ServicioCRL.DIGERCIC_CRL);
+
+        logger.info("Descargando CRL de UANATACA1...");
+        X509CRL uanatacaCrl1 = downloadCrl(ServicioCRL.UANATACA_CRL1);
+
+        logger.info("Descargando CRL de UANATACA2...");
+        X509CRL uanatacaCrl2 = downloadCrl(ServicioCRL.UANATACA_CRL2);
+
         try (Connection conn = ds.getConnection();
                 Statement st = conn.createStatement();
                 PreparedStatement ps = conn.prepareStatement(
@@ -111,7 +120,12 @@ public class ServicioDescargaCrl {
             logger.info("Creando tabla temporal");
             st.executeUpdate("CREATE TABLE crl_new (LIKE crl)");
 
-            int contadorBCE = 0, contadorSD1 = 0, contadorSD2 = 0, contadorSD3 = 0, contadorSD4 = 0, contadorSD5 = 0, contadorCJ = 0, contadorANFAC = 0;
+            int contadorBCE = 0;
+            int contadorSD1 = 0, contadorSD2 = 0, contadorSD3 = 0, contadorSD4 = 0, contadorSD5 = 0;
+            int contadorCJ = 0;
+            int contadorANFAC = 0;
+            int contadorDIGERCIC = 0;
+            int contadorUANATACA1 = 0, contadorUANATACA2 = 0;
 
             if (bceCrl != null) {
                 contadorBCE = insertarCrl(bceCrl, 1, ps);
@@ -169,7 +183,28 @@ public class ServicioDescargaCrl {
                 logger.info("No se inserta ANFAC");
             }
 
-            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC;
+            if (uanatacaCrl1 != null) {
+                contadorUANATACA1 = insertarCrl(uanatacaCrl1, 5, ps);
+                logger.info("Registros insertados UANATACA 1: " + contadorUANATACA1);
+            } else {
+                logger.info("No se inserta UANATACA 1");
+            }
+
+            if (uanatacaCrl2 != null) {
+                contadorUANATACA2 = insertarCrl(uanatacaCrl2, 6, ps);
+                logger.info("Registros insertados UANATACA 2: " + contadorUANATACA2);
+            } else {
+                logger.info("No se inserta UANATACA 2");
+            }
+            
+            if (digercicCrl != null) {
+                contadorDIGERCIC = insertarCrl(digercicCrl, 7, ps);
+                logger.info("Registros insertados DIGERCIC: " + contadorDIGERCIC);
+            } else {
+                logger.info("No se inserta DIGERCIC");
+            }
+
+            int total = contadorBCE + contadorSD1 + contadorSD2 + contadorSD3 + contadorSD4 + contadorSD5 + contadorCJ + contadorANFAC + contadorUANATACA1 + contadorUANATACA2 + contadorDIGERCIC;
             logger.info("Registros insertados Total: " + total);
 
             logger.info("Moviendo tabla temporal a definitiva");
@@ -182,7 +217,7 @@ public class ServicioDescargaCrl {
             logger.log(Level.SEVERE, "Error al insertar certificado", e);
             throw new EJBException(e);
         }
-    }*/
+    }
 
     private int insertarCrl(X509CRL crl, int entidadCertificadora, PreparedStatement ps) throws SQLException {
         // Existen CRLs?
