@@ -1,12 +1,15 @@
 = FirmaEC: Servicio
 
+image:https://travis-ci.com/AlexJCM/firmadigital-servicio.svg?token=cqT9Kb3qnxCpDB8s2vMV&branch=main["Build Status", link="https://travis-ci.com/AlexJCM/firmadigital-servicio"]
+image:https://img.shields.io/badge/License-AGPL%20v3-blue.svg[License: AGPL v3, link=https://www.gnu.org/licenses/agpl-3.0]
+
 _FirmaEC Servicio_ es una plataforma para recibir documentos desde sistemas transversales, para luego ser firmados digitalmente del lado del cliente.
 
 == Introducción
 Los siguientes pasos le permitirán obtener una copia del proyecto para correrla en la máquina local para propósitos de desarrollo y pruebas.
 
 ==== WildFly
-Para desplegar la aplicación se necesita un servidor de aplicaciones *Java EE 11*.
+Para desplegar la aplicación se necesita un servidor de aplicaciones *Java EE 8*.
 Se debe utilizar _WildFly Application Server 20.0.0_, disponible en http://www.wildfly.org[wildfly.org]
 
 ==== Maven
@@ -111,4 +114,4 @@ Usamos http://semver.org[SemVer] para versionar.
 == Licencia
 
 Este proyecto está licenciado bajo la licencia AGPL v3.
-Revisar LICENSE para detalles.
+Revise el archivo <<LICENSE, LICENSE>> para más detalles.
