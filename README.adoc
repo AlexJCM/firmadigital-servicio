@@ -1,6 +1,5 @@
 = FirmaEC: Servicio
 
-image:https://travis-ci.com/AlexJCM/firmadigital-servicio.svg?token=cqT9Kb3qnxCpDB8s2vMV&branch=main["Build Status", link="https://travis-ci.com/AlexJCM/firmadigital-servicio"]
 image:https://img.shields.io/badge/License-AGPL%20v3-blue.svg[License: AGPL v3, link=https://www.gnu.org/licenses/agpl-3.0]
 
 _FirmaEC Servicio_ es una plataforma para recibir documentos desde sistemas transversales, para luego ser firmados digitalmente del lado del cliente.
