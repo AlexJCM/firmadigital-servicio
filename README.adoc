@@ -110,6 +110,11 @@ run-batch
 Usamos http://semver.org[SemVer] para versionar.
 
 
+== Documentación
+
+Ver documentación en: https://alexjcm.github.io/firmadigital-servicio
+
+
 == Licencia
 
 Este proyecto está licenciado bajo la licencia AGPL v3.
