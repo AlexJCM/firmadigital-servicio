@@ -68,14 +68,21 @@ public class ServicioDescargaCrl {
     private static final Logger logger = Logger.getLogger(ServicioDescargaCrl.class.getName());
 
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
-    /* @PostConstruct
+    @PostConstruct
     public void init() {
         crearTablaSiNoExiste();
         importarCrls();
-    }*/
+    }
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
-
-    @Schedule(minute = "0", hour = "*", persistent = false)
+    
+    /**
+     * To run on every Monday at 7 am   
+     * @Schedule(dayOfWeek = "Mon", hour = "7", persistent = false)
+     * 
+     * To run every hour
+     * @Schedule(minute = "0", hour = "*", persistent = false)
+     */
+    @Schedule(dayOfWeek = "Mon", hour = "7", persistent = false)
     public void importarCrls() {
         logger.info("Iniciando el proceso de descarga de CRL");
 

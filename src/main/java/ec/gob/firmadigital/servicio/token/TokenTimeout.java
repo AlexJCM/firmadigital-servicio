@@ -30,6 +30,11 @@ public class TokenTimeout {
     public static final int DEFAULT_TIMEOUT = 5;
 
     /**
+     * Horas antes de que el Token expire.
+     */
+    public static final int DEFAULT_TIMEOUT_HOURS = 720;
+
+    /**
      * Agregar una cantidad de minutos a una hora dada.
      *
      * @param date
@@ -38,6 +43,18 @@ public class TokenTimeout {
      */
     public static Date addMinutes(Date date, int minutes) {
         long time = date.getTime() + (minutes * 60 * 1000);
+        return new Date(time);
+    }
+
+    /**
+     * Agregar una cantidad de horas a una hora dada.
+     *
+     * @param date
+     * @param hours
+     * @return
+     */
+    public static Date addHours(Date date, int hours) {
+        long time = date.getTime() + (hours * 60 * 60 * 1000);
         return new Date(time);
     }
 }
