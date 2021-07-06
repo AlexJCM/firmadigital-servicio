@@ -76,7 +76,7 @@ public class ServicioDescargaCrl {
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
     
     /**
-     * To run on every Monday at 7 am   
+     * To run on every Monday at 9 am   
      * @Schedule(dayOfWeek = "Mon", hour = "7", persistent = false)
      * 
      * To run every hour

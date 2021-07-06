@@ -47,10 +47,10 @@ public class ServicioEliminacionDocumento {
     private DataSource ds;
 
     // Timeout en minutos
-    private static final String TIMEOUT = "5";
+    //private static final String TIMEOUT = "5";
     
     // Timeout en horas
-    private static final String TIMEOUT_HOURS = "720";
+    private static final String TIMEOUT_HOURS = "360";
 
     private static final Logger logger = Logger.getLogger(ServicioEliminacionDocumento.class.getName());
 
@@ -62,10 +62,13 @@ public class ServicioEliminacionDocumento {
     // To run every n minutes
     // @Schedule(hour = "*", minute = "*/" + TIMEOUT, persistent = false)
     
+    // To run on every Monday at 7 am   
+    // @Schedule(dayOfWeek = "Mon", hour = "7", persistent = false)
+    
     // To run on the first day of every month at 9 am
     // @Schedule(dayOfMonth="1", hour = "9", persistent = false)
 
-    @Schedule(dayOfMonth="1", hour = "9", persistent = false)
+    @Schedule(dayOfWeek = "Mon", hour = "9", persistent = false)
     public void borrarDocumentos() {
         Connection conn = null;
         Statement st = null;
@@ -78,7 +81,7 @@ public class ServicioEliminacionDocumento {
             logger.info("Borrando documentos de hace mas de " + TIMEOUT_HOURS + " horas...");
             // int n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + TIMEOUT + " minutes'");
             int n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + TIMEOUT_HOURS + " hours'");
-            logger.info("Registros eliminados: " + n);
+            logger.log(Level.INFO, "Registros eliminados: {0}", n);
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error al borrar documentos", e);
             throw new EJBException(e);
