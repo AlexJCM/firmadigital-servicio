@@ -63,10 +63,12 @@ Para facilitar el desarrollo se puede utilizar Docker. Se puede instalar las dep
 
 [source, bash]
 ----
-docker run -d --name postgresql_firmadigital -e POSTGRESQL_USER=firmadigital -e POSTGRESQL_PASSWORD=firmadigital -e POSTGRESQL_DATABASE=firmadigital -p 5432:5432 centos/postgresql-96-centos7
+docker run -d --name postgresql_firmadigital -e POSTGRESQL_USER=firmadigital -e POSTGRESQL_PASSWORD=firmadigital -e POSTGRESQL_DATABASE=firmadigital -p 5432:5432 centos/postgresql-12-centos7
 ----
 
-Se necesita un registro en la tabla "sistema" para poder probar, por ejemplo:
+Se necesita un registro en la tabla "sistema" para poder probar, para lo cual primero generamos un hash SHA256 utilizando cualquiera de las siguientes dos opciones:
+
+*Opción 1:*
 
 [source, bash]
 ----
@@ -76,11 +78,16 @@ export API_KEY_HASH=$(echo -n $API_KEY | sha256sum | cut -d' ' -f1)
 echo "El HASH-256 del API-KEY, a insertar en la base de datos, es $API_KEY_HASH"
 ----
 
-En la tabla "sistema" se debería insertar este hash:
+*Opción 2:*
+
+https://hash.online-convert.com/es/generador-sha256
+
+
+En la tabla "sistema" de la base de datos se debería insertar el hash generado (Para el ambiente LOCAL O PRODUCCION):
 
 [source, sql]
 ----
-INSERT INTO sistema(nombre,url,apikey,descripcion) values ('quipux', 'http://localhost/quipux', '$API_KEY_HASH', 'Quipux');
+INSERT INTO sistema(id, url, apikey, apikeyrest, descripcion, nombre) VALUES (1, 'http://localhost:7776/recepcion/rest', '$API_KEY_HASH', '$API_KEY_HASH', 'Módulo de certificación electrónica', 'mce');
 ----
 
 Para configurar el DataSource de PostgreSQL que apunta al contenedor, en WildFly se puede ejecutar el siguiente script para JBoss CLI:
@@ -114,3 +121,4 @@ https://alexjcm.github.io/firmadigital-servicio[Ver documentación]
 
 Este proyecto está licenciado bajo la licencia AGPL v3.
 Revise el archivo link:LICENSE[LICENSE] para más detalles.
+
