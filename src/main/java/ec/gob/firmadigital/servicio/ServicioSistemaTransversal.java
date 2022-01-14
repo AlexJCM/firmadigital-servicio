@@ -15,6 +15,9 @@
  */
 package ec.gob.firmadigital.servicio;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -52,6 +55,11 @@ import org.w3c.dom.NodeList;
 
 import ec.gob.firmadigital.servicio.model.Sistema;
 import io.rubrica.certificate.CertEcUtils;
+import io.rubrica.certificate.to.Certificado;
+import io.rubrica.certificate.to.Documento;
+import io.rubrica.utils.Utils;
+import java.text.DateFormat;
+import java.util.Calendar;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -128,37 +136,71 @@ public class ServicioSistemaTransversal {
      * Almacena el documento firmado en el sistema tranversarl, mediante la
      * invocación de un Web Service (SOAP).
      *
+     * @param documento
      * @param cedula
      * @param nombreDocumento
      * @param archivoBase64
-     * @param nombreApellidoFirmante
      * @param url
      * @param apiKeyRest
-     * @param certificate
      * @throws SistemaTransversalException
      */
-    public void almacenarDocumentoREST(String cedula, String nombreDocumento, String archivoBase64, String nombreApellidoFirmante, URL url, String apiKeyRest,
-            X509Certificate certificate) throws SistemaTransversalException {
-        com.google.gson.JsonObject object = new com.google.gson.JsonObject();
-        object.addProperty("cedula", cedula);
-        object.addProperty("nombreDocumento", nombreDocumento);
-        object.addProperty("archivo", archivoBase64);
-        object.addProperty("fecha", sdf.format(new Date()));
-        object.addProperty("nombreApellidoFirmante", nombreApellidoFirmante);
-        if (certificate == null) {
-            System.out.println("Advertencia: El certificado es nulo");
-            object.addProperty("institucion", "No encontrado");
-            object.addProperty("cargo", "No encontrado");
-        } else {
-            object.addProperty("institucion", CertEcUtils.getDatosUsuarios(certificate).getInstitucion());
-            object.addProperty("cargo", CertEcUtils.getDatosUsuarios(certificate).getCargo());
+    public void almacenarDocumentoREST(io.rubrica.certificate.to.Documento documento, String cedula, String nombreDocumento, String archivoBase64, URL url, String apiKeyRest
+    ) throws SistemaTransversalException {
+        JsonObject jsonDoc = new JsonObject();
+        jsonDoc.addProperty("cedula", cedula);
+        jsonDoc.addProperty("nombreDocumento", nombreDocumento);
+        jsonDoc.addProperty("archivo", archivoBase64);
+        try {
+            if (documento != null) {
+                if (documento.getError() == null) {
+                    jsonDoc.addProperty("firmasValidas", documento.getSignValidate());
+                    jsonDoc.addProperty("integridadDocumento", documento.getDocValidate());
+                    jsonDoc.addProperty("error", "null");
+                    JsonArray arrayCer = new JsonArray();
+                    for (Certificado cert : documento.getCertificados()) {
+                        JsonObject jsonCer = new JsonObject();
+                        jsonCer.addProperty("emitidoPara", cert.getIssuedTo());
+                        jsonCer.addProperty("emitidoPor", cert.getIssuedBy());
+                        jsonCer.addProperty("validoDesde", calendarToString(cert.getValidFrom()));
+                        jsonCer.addProperty("validoHasta", calendarToString(cert.getValidTo()));
+                        jsonCer.addProperty("fechaFirma", calendarToString(cert.getGenerated()));
+                        jsonCer.addProperty("fechaRevocado", cert.getRevocated() != null ? calendarToString(cert.getRevocated()) : "");
+                        jsonCer.addProperty("certificadoVigente", cert.getValidated());
+                        jsonCer.addProperty("clavesUso", cert.getKeyUsages());
+                        jsonCer.addProperty("fechaSelloTiempo", cert.getDocTimeStamp() != null ? dateToString(cert.getDocTimeStamp()) : "");
+                        jsonCer.addProperty("integridadFirma", cert.getSignVerify());
+                        jsonCer.addProperty("razonFirma", cert.getDocReason() != null ? cert.getDocReason() : "");
+                        jsonCer.addProperty("localizacion", cert.getDocLocation() != null ? cert.getDocLocation() : "");
+                        jsonCer.addProperty("cedula", cert.getDatosUsuario().getCedula());
+                        jsonCer.addProperty("nombre", cert.getDatosUsuario().getNombre());
+                        jsonCer.addProperty("apellido", cert.getDatosUsuario().getApellido());
+                        jsonCer.addProperty("institucion", cert.getDatosUsuario().getInstitucion());
+                        jsonCer.addProperty("cargo", cert.getDatosUsuario().getCargo());
+                        jsonCer.addProperty("entidadCertificadora", cert.getDatosUsuario().getEntidadCertificadora());
+                        jsonCer.addProperty("serial", cert.getDatosUsuario().getSerial());
+                        jsonCer.addProperty("selladoTiempo", cert.getDatosUsuario().getSelladoTiempo());
+                        jsonCer.addProperty("certificadoDigitalValido", cert.getDatosUsuario().isCertificadoDigitalValido());
+                        arrayCer.add(jsonCer);
+                    }
+                    jsonDoc.add("certificado", arrayCer);
+                } else {
+                    jsonDoc.addProperty("firmasValidas", false);
+                    jsonDoc.addProperty("integridadDocumento", false);
+                    jsonDoc.addProperty("error", documento.getError());
+                }
+            }
+        } catch (Exception exception) {
+            jsonDoc = new JsonObject();
+            jsonDoc.addProperty("firmasValidas", false);
+            jsonDoc.addProperty("integridadDocumento", false);
+            jsonDoc.addProperty("error", "El archivo no pudo ser validado o no es un PDF");
         }
         //Consumo del Servicio Web en REST
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(url.toString());
-        Response response = target.request().header(API_KEY_HEADER_PARAMETER, apiKeyRest).header("Content-Type", MediaType.APPLICATION_JSON).post(Entity.json(object.toString()));
+        Response response = target.request().header(API_KEY_HEADER_PARAMETER, apiKeyRest).header("Content-Type", MediaType.APPLICATION_JSON).post(Entity.json(jsonDoc.toString()));
         String resultado = response.readEntity(String.class);
-        System.out.println("response: " + response.getStatus() + "-" + response.getStatusInfo() + " resultado: " + resultado);
+        System.out.println("response.getStatus(): " + response.getStatus() + " response.getStatusInfo(): " + response.getStatusInfo() + " response.readEntity(String.class): " + resultado);
         if ("OK".equals(resultado)) {
             return;
         } else if ("ERROR".equals(resultado)) {
@@ -166,6 +208,17 @@ public class ServicioSistemaTransversal {
         } else {
             throw new SistemaTransversalException("Resultado invalido del sistema transversal: " + resultado);
         }
+    }
+
+    private String calendarToString(Calendar calendar) {
+        Date date = calendar.getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.format(date);
+    }
+
+    private String dateToString(Date date) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.format(date);
     }
 
     /**
