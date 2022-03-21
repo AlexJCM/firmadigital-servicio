@@ -9,13 +9,13 @@ Los siguientes pasos le permitirán obtener una copia del proyecto para correrla
 
 === Pre-requisitos
 
+- Open JDK 8
+
 - WildFly Application Server 20.- Para desplegar la aplicación se necesita un servidor de aplicaciones *Java EE 7* disponible en http://www.wildfly.org[wildfly.org]
 
 - Maven 3.- Para compilar y empaquetar se utiliza http://maven.apache.org[Apache Maven].
 
-- JDK 1.8
-
-- Postgresql 12
+- Postgresql 12.6 o superior
 
 == Instalación
 
@@ -33,18 +33,18 @@ Esto produce el WAR en _target/fservicio.war_
 
 == Balanceo de carga
 
-Se debe generar una llave a través de la clase ServicioTokenJwt.java y el resultado configurarlo dentro del archivo de configuración Wildfly en la siguiente sección
+Se debe generar una llave a través de la clase `token/jwt/ServicioTokenJwt.java y el resultado configurarlo dentro del archivo de configuración Wildfly en la siguiente sección
 
 [source, xml]
 ----
 </extensions>
 <system-properties>
-	<property name="jwt.key" value="value="tYdX9if...=="/>
+	<property name="jwt.key" value="value="tYdX9if......=="/>
 </system-properties>
 <management>
 ----
 
-Se debe comentar el siguiente código dentro de la clase ServicioDescargaCrl.java para generar el compilado que no realice descargas de CRL
+Se debe comentar el siguiente código dentro de la clase `crl/ServicioDescargaCrl.java` para generar el compilado que no realice descargas de CRL
 
 [source, java]
 ----
@@ -97,7 +97,7 @@ Ejecutar `bin/jboss-cli.sh -c` y luego el siguiente script:
 [source, bash]
 ----
 batch
-module add --name=org.postgresql --resources=/home/rarguello/Downloads/postgresql-42.2.2.jar --dependencies=javax.api,javax.transaction.api
+module add --name=org.postgresql --resources=/home/Downloads/postgresql-42.2.13.jar --dependencies=javax.api,javax.transaction.api
 
 /subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-xa-datasource-class-name=org.postgresql.xa.PGXADataSource)
 
