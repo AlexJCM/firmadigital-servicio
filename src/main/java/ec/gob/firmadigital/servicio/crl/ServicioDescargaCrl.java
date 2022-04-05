@@ -78,9 +78,6 @@ public class ServicioDescargaCrl {
     /**
      * To run on every Monday at 9 am   
      * @Schedule(dayOfWeek = "Mon", hour = "7", persistent = false)
-     * 
-     * To run every hour
-     * @Schedule(minute = "0", hour = "*", persistent = false)
      */
     @Schedule(dayOfWeek = "Mon", hour = "7", persistent = false)
     public void importarCrls() {
