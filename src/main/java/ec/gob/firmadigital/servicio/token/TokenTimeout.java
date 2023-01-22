@@ -41,8 +41,9 @@ public class TokenTimeout {
     /**
      * Indica si es el ambiente de producción o de pruebas. Es utilizado par definir el tiempo en
      * que se elimina documentos sin firmar y para establecer el tiempo de expiración del token.
+     * true = es ambiente produccion
+     * false = es ambiente de pruebas
      */
-    //public static final Boolean IS_PRODUCTION = true;
     public static final Boolean IS_PRODUCTION = false;
 
     /**
