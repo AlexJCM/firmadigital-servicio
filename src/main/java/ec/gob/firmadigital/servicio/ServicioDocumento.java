@@ -16,6 +16,8 @@
 package ec.gob.firmadigital.servicio;
 
 import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT_HOURS;
+import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT_MINUTES;
+import static ec.gob.firmadigital.servicio.token.TokenTimeout.IS_PRODUCTION;
 
 import java.io.IOException;
 import java.net.URL;
@@ -121,8 +123,12 @@ public class ServicioDocumento {
         parametros.put("ids", String.join(",", ids));
 
         // Expiracion del Token
-        //Date expiracion = TokenTimeout.addMinutes(new Date(), DEFAULT_TIMEOUT);
-        Date expiracion = TokenTimeout.addHours(new Date(), DEFAULT_TIMEOUT_HOURS);
+        Date expiracion = null;
+        if (Boolean.TRUE.equals(IS_PRODUCTION)) {
+            expiracion = TokenTimeout.addHours(new Date(), DEFAULT_TIMEOUT_HOURS);
+        } else {
+            expiracion = TokenTimeout.addMinutes(new Date(), DEFAULT_TIMEOUT_MINUTES);
+        }
 
         // Retorna el Token
         return servicioToken.generarToken(parametros, expiracion);

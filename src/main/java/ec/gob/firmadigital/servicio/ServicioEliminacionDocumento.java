@@ -15,6 +15,10 @@
  */
 package ec.gob.firmadigital.servicio;
 
+import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT_HOURS;
+import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT_MINUTES;
+import static ec.gob.firmadigital.servicio.token.TokenTimeout.IS_PRODUCTION;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -31,8 +35,8 @@ import javax.ejb.TimerService;
 import javax.sql.DataSource;
 
 /**
- * Servicio para eliminar documentos de la base de datos que no han sido
- * firmados por n minutos.
+ * Servicio para eliminar documentos de la base de datos que no han sido firmados por n minutos o n
+ * horas.
  *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
@@ -46,29 +50,18 @@ public class ServicioEliminacionDocumento {
     @Resource(lookup = "java:/FirmaDigitalDS")
     private DataSource ds;
 
-    // Timeout en minutos
-    //private static final String TIMEOUT = "5";
-    
-    // Timeout en horas
-    private static final String TIMEOUT_HOURS = "360";
-
-    private static final Logger logger = Logger.getLogger(ServicioEliminacionDocumento.class.getName());
+    private static final Logger logger = Logger.getLogger(
+        ServicioEliminacionDocumento.class.getName());
 
     @PostConstruct
     public void init() {
         borrarDocumentos();
     }
-    
-    // To run every n minutes
-    // @Schedule(hour = "*", minute = "*/" + TIMEOUT, persistent = false)
-    
-    // To run on every Monday at 7 am   
-    // @Schedule(dayOfWeek = "Mon", hour = "7", persistent = false)
-    
-    // To run on the first day of every month at 9 am
-    // @Schedule(dayOfMonth="1", hour = "9", persistent = false)
 
-    @Schedule(dayOfWeek = "Mon", hour = "9", persistent = false)
+    //To run on every Monday at 8 am
+    //@Schedule(dayOfWeek = "Mon", hour = "8", persistent = false)
+    //To run every n minutes
+    @Schedule(hour = "*", minute = "*/" + DEFAULT_TIMEOUT_MINUTES, persistent = false)
     public void borrarDocumentos() {
         Connection conn = null;
         Statement st = null;
@@ -76,11 +69,15 @@ public class ServicioEliminacionDocumento {
         try {
             conn = ds.getConnection();
             st = conn.createStatement();
+            int n = 0;
+            if (Boolean.TRUE.equals(IS_PRODUCTION)) {
+                logger.info("Borrando documentos de hace mas de " + DEFAULT_TIMEOUT_HOURS + " horas...");
+                n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + DEFAULT_TIMEOUT_HOURS + " hours'");
+            } else {
+                logger.info("Borrando documentos de hace mas de " + DEFAULT_TIMEOUT_MINUTES + " minutos...");
+                n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + DEFAULT_TIMEOUT_MINUTES + " minutes'");
+            }
 
-            // logger.info("Borrando documentos de hace mas de " + TIMEOUT + " minutos...");
-            logger.info("Borrando documentos de hace mas de " + TIMEOUT_HOURS + " horas...");
-            // int n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + TIMEOUT + " minutes'");
-            int n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + TIMEOUT_HOURS + " hours'");
             logger.log(Level.INFO, "Registros eliminados: {0}", n);
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error al borrar documentos", e);
