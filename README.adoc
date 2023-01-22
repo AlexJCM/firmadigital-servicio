@@ -83,11 +83,21 @@ echo "El HASH-256 del API-KEY, a insertar en la base de datos, es $API_KEY_HASH"
 https://hash.online-convert.com/es/generador-sha256
 
 
-En la tabla "sistema" de la base de datos se debería insertar el hash generado (Para el ambiente LOCAL O PRODUCCION):
+En la tabla "sistema" de la base de datos se debería insertar el hash generado (Para el ambiente de DESARROLLO o PRODUCCION):
 
 [source, sql]
 ----
-INSERT INTO sistema(id, url, apikey, apikeyrest, descripcion, nombre) VALUES (1, 'http://localhost:7776/recepcion/rest', '$API_KEY_HASH', '$API_KEY_HASH', 'Módulo de certificación electrónica', 'mce');
+# Para crear:
+INSERT INTO sistema(id, url, apikey, apikeyrest, descripcion, nombre) VALUES (1, 'http://localhost:7776/recepcion/receiveDocument/saveSignedFile', '$API_KEY_HASH', '$API_KEY_HASH', 'Módulo de certificación electrónica', 'mce');
+
+# Para actualizar:
+UPDATE sistema
+SET url = 'http://localhost:7776/recepcion/receiveDocument/saveSignedFile',
+  apikey = '$API_KEY_HASH',
+  apikeyrest = '$API_KEY_HASH',
+  descripcion = 'Módulo de certificación electrónica',
+  nombre = 'mce'
+WHERE id = 1;
 ----
 
 Para configurar el DataSource de PostgreSQL que apunta al contenedor, en WildFly se puede ejecutar el siguiente script para JBoss CLI:

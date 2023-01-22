@@ -58,10 +58,10 @@ public class ServicioEliminacionDocumento {
         borrarDocumentos();
     }
 
-    //To run on every Monday at 8 am
-    //@Schedule(dayOfWeek = "Mon", hour = "8", persistent = false)
     //To run every n minutes
-    @Schedule(hour = "*", minute = "*/" + DEFAULT_TIMEOUT_MINUTES, persistent = false)
+    //@Schedule(hour = "*", minute = "*/" + DEFAULT_TIMEOUT_MINUTES, persistent = false)
+    //To run on every Monday at 9 am
+    @Schedule(dayOfWeek = "Mon", hour = "9", persistent = false)
     public void borrarDocumentos() {
         Connection conn = null;
         Statement st = null;
