@@ -54,6 +54,7 @@ import ec.gob.firmadigital.servicio.ServicioSistemaTransversal;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
+import javax.ws.rs.FormParam;
 
 /**
  * Servicio REST para almacenar, actualizar y obtener documentos desde los
@@ -182,9 +183,11 @@ public class ServicioDocumentoRest {
         try {
             documentos = servicioDocumento.obtenerDocumentos(token);
         } catch (TokenInvalidoException e) {
+            System.out.println("ServicioDocumentoRest::obtenerDocumentos Token invalido: " + token);
             servicioLog.error("ServicioDocumentoRest::obtenerDocumentos", "Token invalido: " + token);
             return Response.status(Status.BAD_REQUEST).entity("Token invalido").build();
         } catch (TokenExpiradoException e) {
+            System.out.println("ServicioDocumentoRest::obtenerDocumentos Token expirado: " + token);
             servicioLog.error("ServicioDocumentoRest::obtenerDocumentos", "Token expirado: " + token);
             return Response.status(Status.BAD_REQUEST).entity("Token expirado").build();
         }
@@ -196,6 +199,11 @@ public class ServicioDocumentoRest {
             array.add(Json.createObjectBuilder().add("id", id).add("documento", documento));
         }
 
+//        System.out.println("array: "+array.build().toString());
+//        System.out.println("array: "+array.build().size());
+//        if (array.build().isEmpty()) {
+//            return Response.status(Status.BAD_REQUEST).entity("Token gestionado").build();
+//        }
         // La fecha actual en formato ISO-8601 (2017-08-27T17:54:43.562-05:00)
         String fechaHora = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
@@ -206,16 +214,21 @@ public class ServicioDocumentoRest {
 
     @PUT
     @Path("{token}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response actualizarDocumentos(@PathParam("token") String token, JsonObject json) {
-        String cedulaJson = json.getString("cedula");
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response actualizarDocumentos(@PathParam("token") String token, @FormParam("json") String json, @FormParam("base64") String base64) {
+        JsonObject jsonObject;
+        try (JsonReader jsonReader = Json.createReader(new StringReader(json))) {
+            jsonObject = jsonReader.readObject();
+        }
+
+        String cedulaJson = jsonObject.getString("cedula");
 
         if (cedulaJson == null || cedulaJson.isEmpty()) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Cedula vacia");
             return Response.status(Status.BAD_REQUEST).entity("Cedula vacia").build();
         }
 
-        List<JsonObject> array = json.getJsonArray("documentos").getValuesAs(JsonObject.class);
+        List<JsonObject> array = jsonObject.getJsonArray("documentos").getValuesAs(JsonObject.class);
 
         if (array.size() == 0) {
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "No se encuentran documentos");
@@ -248,7 +261,7 @@ public class ServicioDocumentoRest {
         }
 
         try {
-            int documentosFirmados = servicioDocumento.actualizarDocumentos(token, documentos, cedulaJson);
+            int documentosFirmados = servicioDocumento.actualizarDocumentos(token, documentos, cedulaJson, base64);
             JsonObject jsonResponse = Json.createObjectBuilder().add("documentos_recibidos", documentos.size())
                     .add("documentos_firmados", documentosFirmados).build();
             return Response.ok(jsonResponse).build();

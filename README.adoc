@@ -9,9 +9,9 @@ Los siguientes pasos le permitirán obtener una copia del proyecto para correrla
 
 === Pre-requisitos
 
-- Open JDK 8
+- Open JDK 11
 
-- WildFly Application Server 20.- Para desplegar la aplicación se necesita un servidor de aplicaciones *Java EE 7* disponible en http://www.wildfly.org[wildfly.org]
+- WildFly Application Server 26.1.1.- Para desplegar la aplicación se necesita un servidor de aplicaciones *Java EE 11* disponible en http://www.wildfly.org[wildfly.org]
 
 - Maven 3.- Para compilar y empaquetar se utiliza http://maven.apache.org[Apache Maven].
 
@@ -126,6 +126,11 @@ Usamos http://semver.org[SemVer] para versionar.
 
 https://alexjcm.github.io/firmadigital-servicio[Ver documentación]
 
+== Autores
+
+* *Juan Diego Calle* - *Desarrollo inicial* - http://www.soportelibre.com[Soporte Libre]
+* *Ricardo Arguello* - *Desarrollo* - http://www.soportelibre.com[Soporte Libre]
+* *Misael Fernández* - *Desarrollo* - misael.fernandez.correa@gmail.com
 
 == Licencia
 

@@ -38,6 +38,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import javax.ejb.Lock;
@@ -136,7 +137,7 @@ public class ServicioTokenJwt implements ServicioToken {
     public Map<String, Object> parseToken(String token) throws TokenInvalidoException, TokenExpiradoException {
         try {
             return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-        } catch (MalformedJwtException | SignatureException | MissingClaimException e) {
+        } catch (MalformedJwtException | SignatureException | UnsupportedJwtException | IllegalArgumentException | MissingClaimException e) {
             throw new TokenInvalidoException(e);
         } catch (ExpiredJwtException e) {
             throw new TokenExpiradoException(e);
