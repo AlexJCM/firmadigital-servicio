@@ -63,7 +63,7 @@ public class ServicioDescargaCrl {
     @PostConstruct
     public void init() {
         crearTablaSiNoExiste();
-        importarCrls();
+        //importarCrls();
     }
 
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR DESCARGA CRL
@@ -72,6 +72,7 @@ public class ServicioDescargaCrl {
      *
      * @Schedule(dayOfWeek = "Mon", hour = "7", persistent = false)
      */
+    /*
     @Schedule(dayOfWeek = "Mon", hour = "7", persistent = false)
     public void importarCrls() {
         logger.info("Iniciando el proceso de descarga de CRL");
@@ -243,7 +244,7 @@ public class ServicioDescargaCrl {
             logger.log(Level.SEVERE, "Error al insertar/actualizar certificados revocados", e);
             throw new EJBException(e);
         }
-    }
+    }*/
 
     private int insertarCrl(X509CRL crl, int entidadCertificadora, PreparedStatement ps) throws SQLException {
         // Existen CRLs?

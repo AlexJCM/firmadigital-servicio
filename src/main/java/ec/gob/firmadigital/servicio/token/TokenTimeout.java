@@ -44,7 +44,7 @@ public class TokenTimeout {
      * true = es ambiente produccion
      * false = es ambiente de pruebas
      */
-    public static final Boolean IS_PRODUCTION = false;
+    public static final Boolean IS_PRODUCTION = true;
 
     /**
      * Agregar una cantidad de minutos a una hora dada.
