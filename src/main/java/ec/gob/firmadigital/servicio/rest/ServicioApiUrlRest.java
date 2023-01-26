@@ -54,7 +54,7 @@ public class ServicioApiUrlRest {
         if (base64 == null || base64.isEmpty()) {
             return "Se debe generar en Base64";
         }
-        logger.info("base64=" + base64);
+        logger.info("URLBase64=" + base64);
         String jsonParameter = new String(Base64.getDecoder().decode(base64));
         if (jsonParameter == null || jsonParameter.isEmpty()) {
             return "Se debe incluir JSON con los parámetros: sistema, fecha_desde y fecha_hasta";

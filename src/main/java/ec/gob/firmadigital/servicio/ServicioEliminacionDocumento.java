@@ -18,13 +18,11 @@ package ec.gob.firmadigital.servicio;
 import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT_HOURS;
 import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT_MINUTES;
 import static ec.gob.firmadigital.servicio.token.TokenTimeout.IS_PRODUCTION;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.EJBException;
@@ -50,9 +48,8 @@ public class ServicioEliminacionDocumento {
     @Resource(lookup = "java:/FirmaDigitalDS")
     private DataSource ds;
 
-    private static final Logger logger = Logger.getLogger(
-        ServicioEliminacionDocumento.class.getName());
-
+    private static final Logger logger = Logger.getLogger(ServicioEliminacionDocumento.class.getName());
+    //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
     @PostConstruct
     public void init() {
         borrarDocumentos();
@@ -62,6 +59,7 @@ public class ServicioEliminacionDocumento {
     //@Schedule(hour = "*", minute = "*/" + DEFAULT_TIMEOUT_MINUTES, persistent = false)
     //To run on every Monday at 9 am
     @Schedule(dayOfWeek = "Mon", hour = "9", persistent = false)
+    //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
     public void borrarDocumentos() {
         Connection conn = null;
         Statement st = null;
@@ -78,7 +76,7 @@ public class ServicioEliminacionDocumento {
                 n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + DEFAULT_TIMEOUT_MINUTES + " minutes'");
             }
 
-            logger.log(Level.INFO, "Registros eliminados: {0}", n);
+            logger.info("Registros eliminados: " + n);
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error al borrar documentos", e);
             throw new EJBException(e);

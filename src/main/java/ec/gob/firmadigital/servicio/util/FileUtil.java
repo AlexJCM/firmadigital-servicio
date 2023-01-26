@@ -24,7 +24,6 @@ public class FileUtil {
             mimeType = tika.detect(is);
             mimeType = mimeType == null ? "" : mimeType;
         } catch (IOException e) {
-            System.out.println("No se pudo determinar el tipo de archivo");
             mimeType = "";
         }
         return mimeType;

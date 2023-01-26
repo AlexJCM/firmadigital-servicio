@@ -15,14 +15,12 @@
  */
 package ec.gob.firmadigital.servicio;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
@@ -34,15 +32,15 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.xml.bind.DatatypeConverter;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.Name;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPBodyElement;
-import javax.xml.soap.SOAPConnection;
-import javax.xml.soap.SOAPConnectionFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPFactory;
-import javax.xml.soap.SOAPMessage;
+import jakarta.xml.soap.MessageFactory;
+import jakarta.xml.soap.Name;
+import jakarta.xml.soap.SOAPBody;
+import jakarta.xml.soap.SOAPBodyElement;
+import jakarta.xml.soap.SOAPConnection;
+import jakarta.xml.soap.SOAPConnectionFactory;
+import jakarta.xml.soap.SOAPException;
+import jakarta.xml.soap.SOAPFactory;
+import jakarta.xml.soap.SOAPMessage;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -54,10 +52,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ec.gob.firmadigital.servicio.model.Sistema;
-import io.rubrica.certificate.CertEcUtils;
 import io.rubrica.certificate.to.Certificado;
-import io.rubrica.certificate.to.Documento;
-import io.rubrica.utils.Utils;
 import java.text.DateFormat;
 import java.util.Calendar;
 import javax.ws.rs.client.Client;
@@ -230,11 +225,9 @@ public class ServicioSistemaTransversal {
      * @param archivo
      * @param datosFirmante
      * @param url
-     * @param certificate
      * @throws SistemaTransversalException
      */
-    public void almacenarDocumento(String usuario, String documento, String archivo, String datosFirmante, URL url,
-            X509Certificate certificate) throws SistemaTransversalException {
+    public void almacenarDocumento(String usuario, String documento, String archivo, String datosFirmante, URL url) throws SistemaTransversalException {
         try {
             MessageFactory factory = MessageFactory.newInstance();
             SOAPMessage soapMessage = factory.createMessage();
@@ -248,18 +241,8 @@ public class ServicioSistemaTransversal {
             bodyElement.addChildElement("set_var_archivo").addTextNode(archivo);
             bodyElement.addChildElement("set_var_datos_firmante").addTextNode(datosFirmante);
             bodyElement.addChildElement("set_var_fecha").addTextNode(sdf.format(new Date()));
-
             String institucion = "";
             String cargo = "";
-            if (certificate == null) {
-                System.out.println("Advertencia: El certificado es nulo");
-                institucion = "No encontrado";
-                cargo = "No encontrado";
-            } else {
-                institucion = CertEcUtils.getDatosUsuarios(certificate).getInstitucion();
-                cargo = CertEcUtils.getDatosUsuarios(certificate).getCargo();
-            }
-
             bodyElement.addChildElement("set_var_institucion").addTextNode(institucion);
             bodyElement.addChildElement("set_var_cargo").addTextNode(cargo);
 

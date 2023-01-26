@@ -19,25 +19,23 @@ package ec.gob.firmadigital.servicio;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.logging.Logger;
-
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 import javax.validation.constraints.NotNull;
-
 import javax.ejb.EJB;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+
 import javax.json.JsonObjectBuilder;
 
+
 /**
- * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
- * federar la utilización de FirmaEC sobre otra infraestructura, consultando en
- * una lista de servidores permitidos.
+ * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite federar la
+ *  utilización de FirmaEC sobre otra infraestructura, consultando en una lista
+ *  de servidores permitidos.
  *
- * @author Misael Fernández
+ * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>, Misael Fernández
  */
 @Stateless
 public class ServicioEstadisticaDocumentosFirmados {
@@ -60,6 +58,7 @@ public class ServicioEstadisticaDocumentosFirmados {
      * @throws ApiEstadisticaException
      */
     public String buscarPorFechaDesdeFechaHasta(@NotNull String sistema, @NotNull String fechaDesde, @NotNull String fechaHasta) throws ApiEstadisticaException {
+        String retorno = "";
         try {
             String nativeQuery = "SELECT s.descripcion, \n"
                     + "	count(*) AS total_firmas, \n"
@@ -75,22 +74,14 @@ public class ServicioEstadisticaDocumentosFirmados {
                     + "	EXTRACT (year FROM fecha) AS year\n"
                     + "FROM log l INNER JOIN sistema s ON l.descripcion like '%'||s.nombre||',%'\n"
                     + "WHERE\n"
-                    + " s.nombre = :sistema AND --nombre del sistema\n"
+                    + " s.nombre = '" + sistema + "' AND --nombre del sistema\n"
                     + "	severidad = 0 AND --documentos firmados con éxito\n"
-                    + "	fecha BETWEEN :fechaDesde AND :fechaHasta\n"
+                    + "	fecha BETWEEN '" + fechaDesde + "' AND '" + fechaHasta + "'\n"
                     + "GROUP BY EXTRACT (month FROM fecha), EXTRACT (year FROM fecha), s.descripcion";
-
-            Query query = em.createNativeQuery(nativeQuery);
-            query.setParameter("sistema", sistema);
-            query.setParameter("fechaDesde", fechaDesde);
-            query.setParameter("fechaHasta", fechaHasta);
-
-            @SuppressWarnings("unchecked")
-            List<Object[]> results = query.getResultList();
-
+            List<Object[]> query = em.createNativeQuery(nativeQuery).getResultList();
             // Para construir un array de firmantes
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-            for (Object[] result : results) {
+            for (Object[] result : query) {
                 JsonObjectBuilder builder = Json.createObjectBuilder();
                 builder.add("descripcion", (String) result[0]);
                 builder.add("total_firmas", (BigInteger) result[1]);
@@ -99,25 +90,28 @@ public class ServicioEstadisticaDocumentosFirmados {
                 builder.add("year", (double) result[4]);
                 arrayBuilder.add(builder);
             }
-
             String json = arrayBuilder.build().toString();
+            retorno = json;
             servicioLog.info("ServicioApiUrl::buscarPorFechaDesdeFechaHasta", "Estadística de documentos firmados con fecha desde: " + fechaDesde + " | fecha hasta: " + fechaHasta);
-            return json;
-        } catch (IndexOutOfBoundsException e) {
-            String retorno = "No se encuentran registros para generar estadísticas";
+//        } catch (java.lang.Exception e) {
+//            e.printStackTrace();
+        } catch (java.lang.IndexOutOfBoundsException e) {
+            retorno = "No se encuentran registros para generar estadísticas";
             logger.severe(retorno);
             servicioLog.error("ServicioApiUrl::buscarPorFechaDesdeFechaHasta", retorno);
             throw new ApiEstadisticaException(retorno);
-        } catch (ClassCastException e) {
-            String retorno = "Problema con tipo de dato en la base de datos";
+        } catch (java.lang.ClassCastException e) {
+            retorno = "Problema con tipo de dato en la base de datos";
             logger.severe(retorno);
             servicioLog.error("ServicioApiUrl::buscarPorFechaDesdeFechaHasta", retorno);
             throw new ApiEstadisticaException(retorno);
-        } catch (PersistenceException e) {
-            String retorno = "Problema con el formato fecha";
+        } catch (javax.persistence.PersistenceException e) {
+            retorno = "Problema con el formato fecha";
             logger.severe(retorno + ": " + "fecha desde: " + fechaDesde + " | fecha hasta: " + fechaHasta);
             servicioLog.error("ServicioApiUrl::buscarPorFechaDesdeFechaHasta", retorno + ": " + "fecha desde: " + fechaDesde + " | fecha hasta: " + fechaHasta);
             throw new ApiEstadisticaException(retorno);
+        } finally {
+            return retorno;
         }
     }
 }

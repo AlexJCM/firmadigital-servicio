@@ -15,23 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package ec.gob.firmadigital.servicio.rest;
 
 import com.google.gson.Gson;
 
 import com.google.gson.JsonArray;
-import ec.gob.firmadigital.servicio.crl.ServicioConsultaCrl;
-import ec.gob.firmadigital.servicio.pdf.ServicioValidacionPdf;
-import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
-import ec.gob.firmadigital.servicio.util.Base64Util;
 import io.rubrica.certificate.to.Certificado;
 import io.rubrica.certificate.to.Documento;
-import io.rubrica.utils.FileUtils;
 import io.rubrica.utils.Utils;
 import com.google.gson.JsonObject;
+import com.itextpdf.kernel.pdf.PdfReader;
+import io.rubrica.sign.SignInfo;
+import io.rubrica.sign.Signer;
+import io.rubrica.sign.pdf.PDFSignerItext;
+import java.io.ByteArrayInputStream;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -40,47 +38,30 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.logging.Logger;
 
 @Stateless
 @Path("/validacionavanzadapdf")
 public class ServicioValidacionPdfRest {
 
-	@EJB
-	private ServicioConsultaCrl servicioCrl;
-
-	private static final Logger LOGGER = Logger.getLogger(ServicioValidacionPdf.class.getName());
-
 	@POST
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response verificarPdf(String archivoBase64)
-		throws Exception {
-
-		byte[] pdf;
-
-		try {
-			pdf = Base64Util.decode(archivoBase64);
-		} catch (Base64InvalidoException e) {
-			return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
-		}
-
-		File file = null;
-		try {
-			file = FileUtils.byteArrayConvertToFile(pdf);
-		} catch (IOException e) {
-			return Response.status(Status.BAD_REQUEST).entity("Error al crear el archivo temporal").build();
-		}
+			throws Exception {
+		byte[] byteDocumento = java.util.Base64.getDecoder().decode(archivoBase64);
+		InputStream inputStreamDocumento = new ByteArrayInputStream(byteDocumento);
+		PdfReader pdfReader = new PdfReader(inputStreamDocumento);
+		Signer signer = new PDFSignerItext();
+		java.util.List<SignInfo> signInfos;
+		signInfos = signer.getSigners(byteDocumento);
 
 		try {
-
-			Documento documento = Utils.pdfToDocumento(file);
+			Documento documento = Utils.pdfToDocumento(pdfReader, signInfos);
 			Gson gson = new Gson();
 			JsonObject jsonDoc = new JsonObject();
 
@@ -155,6 +136,5 @@ public class ServicioValidacionPdfRest {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return dateFormat.format(date);
 	}
-
 
 }
