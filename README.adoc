@@ -17,9 +17,11 @@ Los siguientes pasos le permitirán obtener una copia del proyecto para correrla
 
 - Postgresql 12.6 o superior
 
+- Proyecto https://github.com/alexjcm/firmadigital-libreria[firmadigital-libreria] compilado
+
 == Instalación
 
-Para compilar se debe utilizar Apache Maven:
+Para compilar se debe ejecutar el siguiente comando:
 
 [source, bash]
 ----
