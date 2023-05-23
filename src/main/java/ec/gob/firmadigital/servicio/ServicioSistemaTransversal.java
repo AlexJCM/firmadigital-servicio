@@ -62,6 +62,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import javax.xml.transform.TransformerFactory;
+
+
 /**
  * Servicio para invocar Web Services de los sistemas transaccionales, utilizado
  * para almacenar el documento ya firmado.
@@ -129,7 +132,7 @@ public class ServicioSistemaTransversal {
 
     /**
      * Almacena el documento firmado en el sistema tranversarl, mediante la
-     * invocación de un Web Service (SOAP).
+     * invocación de un Web Service (REST).
      *
      * @param documento
      * @param cedula
@@ -229,6 +232,17 @@ public class ServicioSistemaTransversal {
      */
     public void almacenarDocumento(String usuario, String documento, String archivo, String datosFirmante, URL url) throws SistemaTransversalException {
         try {
+            /**
+             * Se ha agregado las siguientes 2 lineas d codigo para solventar este error:
+             *  Caused by: com.sun.xml.messaging.saaj.SOAPExceptionImpl: Unable to get header stream in saveChanges
+             *  Caused by: java.io.IOException: TransformerFactory no reconoce el atributo 'http://javax.xml.XMLConstants/property/accessExternalDTD'.
+             */
+            // Configurar la fabrica de transformadores
+            System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+            // Establecer la propiedad accessExternalDTD.  Valor en blanco para permitir el acceso a DTDs externos
+            System.setProperty("javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD", "");
+
+
             MessageFactory factory = MessageFactory.newInstance();
             SOAPMessage soapMessage = factory.createMessage();
             SOAPBody body = soapMessage.getSOAPBody();
@@ -247,6 +261,7 @@ public class ServicioSistemaTransversal {
             bodyElement.addChildElement("set_var_cargo").addTextNode(cargo);
 
             SOAPConnection connection = SOAPConnectionFactory.newInstance().createConnection();
+            logger.log(Level.INFO, "Lanzando llamada al Web Service SOAP - url: " + url);
             SOAPMessage response = connection.call(soapMessage, url);
             connection.close();
 
@@ -272,8 +287,8 @@ public class ServicioSistemaTransversal {
                 throw new SistemaTransversalException("Resultado invalido del sistema transversal: " + resultado);
             }
         } catch (SOAPException e) {
-            String mensaje = (String) e.getMessage();
-            //System.out.println("Exception Normal " + mensaje);
+            String mensaje = e.getMessage();
+            logger.log(Level.SEVERE, "Exception Normal: " + mensaje);
             if (mensaje != null) {
                 if (mensaje.contains("SOAP message could not be sent")) {
                     System.out.println("Mensaje SOAP no pudo ser enviado");

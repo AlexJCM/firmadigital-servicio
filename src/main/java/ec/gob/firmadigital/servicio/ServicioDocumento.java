@@ -255,6 +255,7 @@ public class ServicioDocumento {
                     servicioSistemaTransversal.almacenarDocumentoREST(documentoTo, documento.getCedula(), documento.getNombre(),
                             archivoBase64, url, apiKeyRest);
                 } else {
+                    logger.info("******* No hay apiKeyRest, se usara servicio web SOAP ******");
                     servicioSistemaTransversal.almacenarDocumento(documento.getCedula(), documento.getNombre(),
                             archivoBase64, datosFirmante, url);
                 }
@@ -267,6 +268,7 @@ public class ServicioDocumento {
                         + ", sistema operativo " + obtenerSO(base64)
                         + ", tamano documento (bytes) " + documento.getArchivo().length);
             } catch (SistemaTransversalException e) {
+                logger.log(Level.SEVERE, e.getMessage());
                 String mensajeError = "No se pudo enviar el documento al sistema " + nombreSistema;
                 servicioLog.error("ServicioDocumento::actualizarDocumentos", mensajeError);
                 logger.log(Level.SEVERE, mensajeError);
