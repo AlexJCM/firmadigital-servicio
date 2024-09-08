@@ -25,25 +25,25 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.stream.JsonParsingException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.stream.JsonParsingException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import ec.gob.firmadigital.servicio.CedulaInvalidaException;
 import ec.gob.firmadigital.servicio.CertificadoRevocadoException;
@@ -54,7 +54,7 @@ import ec.gob.firmadigital.servicio.ServicioSistemaTransversal;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
 import ec.gob.firmadigital.servicio.token.TokenInvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
-import javax.ws.rs.FormParam;
+import jakarta.ws.rs.FormParam;
 
 /**
  * Servicio REST para almacenar, actualizar y obtener documentos desde los
@@ -97,10 +97,12 @@ public class ServicioDocumentoRest {
     public Response crearDocumentos(@HeaderParam(API_KEY_HEADER_PARAMETER) String apiKey, String jsonParameter) {
 
         if (apiKey == null) {
+            System.out.println("Se debe incluir un API Key!");
             return Response.status(Status.BAD_REQUEST).entity("Se debe incluir un API Key!").build();
         }
 
         if (jsonParameter == null || jsonParameter.isEmpty()) {
+            System.out.println("Se debe incluir JSON!");
             return Response.status(Status.BAD_REQUEST).entity("Se debe incluir JSON!").build();
         }
 
@@ -110,8 +112,9 @@ public class ServicioDocumentoRest {
         try {
             json = (JsonObject) jsonReader.read();
         } catch (JsonParsingException e) {
+            System.out.println("::Error al decodificar JSON: \"" + e.getMessage() + "\"");
             return Response.status(Status.BAD_REQUEST).entity(getClass().getSimpleName() + "::Error al decodificar JSON: \"" + e.getMessage() + "\"")
-                    .build();
+                .build();
         }
 
         String cedula;
@@ -120,19 +123,22 @@ public class ServicioDocumentoRest {
         try {
             cedula = json.getString("cedula");
         } catch (NullPointerException e) {
+            System.out.println("::Error al decodificar JSON: Se debe incluir \"cedula\"");
             return Response.status(Status.BAD_REQUEST).entity(getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"cedula\"")
-                    .build();
+                .build();
         }
 
         try {
             sistema = json.getString("sistema");
         } catch (NullPointerException e) {
+            System.out.println("::Error al decodificar JSON: Se debe incluir \"sistema\"");
             return Response.status(Status.BAD_REQUEST).entity(getClass().getSimpleName() + "::Error al decodificar JSON: Se debe incluir \"sistema\"")
-                    .build();
+                .build();
         }
 
         // Verificar API KEY
         if (!servicioSistemaTransversal.verificarApiKey(sistema, apiKey)) {
+            System.out.println("Error al validar API_KEY para el sistema: " + sistema);
             logger.log(Level.SEVERE, "Error al validar API_KEY para el sistema {0}", sistema);
             return Response.status(Status.FORBIDDEN).entity("Error al validar API_KEY").build();
         }
@@ -140,8 +146,9 @@ public class ServicioDocumentoRest {
         JsonArray array = json.getJsonArray("documentos");
 
         if (array == null) {
+            System.out.println("Error al decodificar JSON: Se debe incluir \"documentos\"");
             return Response.status(Status.BAD_REQUEST)
-                    .entity("Error al decodificar JSON: Se debe incluir \"documentos\"").build();
+                .entity("Error al decodificar JSON: Se debe incluir \"documentos\"").build();
         }
 
         // Documentos a devolver
@@ -160,9 +167,11 @@ public class ServicioDocumentoRest {
             // Retornar un token JWT
             return Response.status(Status.CREATED).entity(token).build();
         } catch (IllegalArgumentException e) {
+            System.out.println("ServicioDocumentoRest::crearDocumentos IllegalArgumentException: " + e.getMessage());
             servicioLog.error("ServicioDocumentoRest::crearDocumentos", "IllegalArgumentException: " + e.getMessage());
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (Base64InvalidoException e) {
+            System.out.println("ServicioDocumentoRest::crearDocumentos Error al decodificar Base64");
             servicioLog.error("ServicioDocumentoRest::crearDocumentos", "Error al decodificar Base64");
             return Response.status(Status.BAD_REQUEST).entity("Error al decodificar Base64").build();
         }
@@ -208,7 +217,7 @@ public class ServicioDocumentoRest {
         String fechaHora = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
         String json = Json.createObjectBuilder().add("fecha_hora", fechaHora).add("documentos", array).build()
-                .toString();
+            .toString();
         return Response.ok(json).build();
     }
 
@@ -224,6 +233,7 @@ public class ServicioDocumentoRest {
         String cedulaJson = jsonObject.getString("cedula");
 
         if (cedulaJson == null || cedulaJson.isEmpty()) {
+            System.out.println("ServicioDocumentoRest::actualizarDocumentos Cedula vacia");
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Cedula vacia");
             return Response.status(Status.BAD_REQUEST).entity("Cedula vacia").build();
         }
@@ -231,6 +241,7 @@ public class ServicioDocumentoRest {
         List<JsonObject> array = jsonObject.getJsonArray("documentos").getValuesAs(JsonObject.class);
 
         if (array.size() == 0) {
+            System.out.println("ServicioDocumentoRest::actualizarDocumentos No se encuentran documentos");
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "No se encuentran documentos");
             return Response.status(Status.BAD_REQUEST).entity("No se encuentran documentos").build();
         }
@@ -243,9 +254,11 @@ public class ServicioDocumentoRest {
             try {
                 id = documentoJson.getInt("id");
             } catch (NullPointerException e) {
+                System.out.println("ServicioDocumentoRest::actualizarDocumentos No se encuentra id");
                 servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "No se encuentra id");
                 return Response.status(Status.BAD_REQUEST).entity("No se encuentra id").build();
             } catch (ClassCastException e) {
+                System.out.println("ServicioDocumentoRest::actualizarDocumentos id no es un int");
                 servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "id no es un int");
                 return Response.status(Status.BAD_REQUEST).entity("No se encuentra id").build();
             }
@@ -263,27 +276,34 @@ public class ServicioDocumentoRest {
         try {
             int documentosFirmados = servicioDocumento.actualizarDocumentos(token, documentos, cedulaJson, base64);
             JsonObject jsonResponse = Json.createObjectBuilder().add("documentos_recibidos", documentos.size())
-                    .add("documentos_firmados", documentosFirmados).build();
+                .add("documentos_firmados", documentosFirmados).build();
             return Response.ok(jsonResponse).build();
         } catch (CedulaInvalidaException e) {
+            System.out.println("ServicioDocumentoRest::actualizarDocumentos Cedula invalida");
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Cedula invalida: " + e.getMessage());
             return generarErrorResponse("Cedula invalida");
         } catch (CertificadoRevocadoException e) {
-            servicioLog.error("ServicioDocumentoRest::certificadoRevocado", e.getMessage());
+            System.out.println("ServicioDocumentoRest::actualizarDocumentos Certificado revocado");
+            servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", e.getMessage());
             return generarErrorResponse("Certificado revocado");
         } catch (IllegalArgumentException e) {
+            System.out.println("ServicioDocumentoRest::actualizarDocumentos No se encontraron documentos para firmar");
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", e.getMessage());
             return generarErrorResponse("No se encontraron documentos para firmar");
         } catch (TokenInvalidoException e) {
+            System.out.println("ServicioDocumentoRest::actualizarDocumentos Token invalido: " + token);
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Token invalido: " + token);
             return generarErrorResponse("Token inválido");
         } catch (TokenExpiradoException e) {
+            System.out.println("ServicioDocumentoRest::actualizarDocumentos Token expirado: " + token);
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Token expirado: " + token);
             return generarErrorResponse("Token expirado");
         } catch (Base64InvalidoException e) {
+            System.out.println("ServicioDocumentoRest::actualizarDocumentos Base 64 invalido");
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "Base 64 invalido");
             return generarErrorResponse("Base 64 inválido");
         } catch (DocumentoNoExisteException e) {
+            System.out.println("ServicioDocumentoRest::actualizarDocumentos No existe documento");
             servicioLog.error("ServicioDocumentoRest::actualizarDocumentos", "No existe documento");
             return generarErrorResponse("No existe documento");
         }
@@ -291,6 +311,6 @@ public class ServicioDocumentoRest {
 
     private Response generarErrorResponse(String error) {
         JsonObject errorResponse = Json.createObjectBuilder().add("error", error).build();
-        return Response.status(Status.BAD_REQUEST).entity(errorResponse).build();
+        return Response.status(Status.NOT_ACCEPTABLE).type(MediaType.TEXT_PLAIN).entity(errorResponse).build();
     }
 }

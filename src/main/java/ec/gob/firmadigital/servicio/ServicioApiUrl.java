@@ -18,16 +18,16 @@ package ec.gob.firmadigital.servicio;
 
 import java.util.logging.Logger;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.validation.constraints.NotNull;
 
 import ec.gob.firmadigital.servicio.model.ApiUrl;
-import javax.ejb.EJB;
+import jakarta.ejb.EJB;
 
 /**
  * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
@@ -64,33 +64,33 @@ public class ServicioApiUrl {
             if (apiUrl.getStatus()) {
                 retorno = "Url habilitada";
                 servicioLog.info("ServicioApiUrl::buscarPorUrl",
-                        "Sistema " + sistema
+                    "Sistema " + sistema
                         + ", URL consultada: " + url + ", " + retorno);
             } else {
                 retorno = "Url deshabilitada";
                 servicioLog.warning("ServicioApiUrl::buscarPorUrl",
-                        "Sistema " + sistema
+                    "Sistema " + sistema
                         + ", URL consultada: " + url + ", " + retorno);
             }
         } catch (NoResultException e) {
             retorno = "URL no encontrado";
             logger.severe(retorno + ": " + url);
             servicioLog.error("ServicioApiUrl::buscarPorUrl",
-                    "Sistema " + sistema
+                "Sistema " + sistema
                     + ", URL consultada: " + url + ", " + retorno);
             throw new ApiUrlNoEncontradoException(retorno);
         } catch (NonUniqueResultException e) {
             retorno = "Varias URLs registradas";
             logger.severe(retorno + ": " + url);
             servicioLog.error("ServicioApiUrl::buscarPorUrl",
-                    "Sistema " + sistema
+                "Sistema " + sistema
                     + ", URL consultada: " + url + ", " + retorno);
             throw new ApiUrlNoEncontradoException(retorno);
         } catch (java.lang.NullPointerException e) {
             retorno = "Revisar el estado de la URL registrada";
             logger.severe(retorno + ": " + url);
             servicioLog.error("ServicioApiUrl::buscarPorUrl",
-                    "Sistema " + sistema
+                "Sistema " + sistema
                     + ", URL consultada: " + url + ", " + retorno);
             throw new ApiUrlNoEncontradoException(retorno);
         } finally {

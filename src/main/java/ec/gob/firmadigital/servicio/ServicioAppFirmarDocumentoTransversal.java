@@ -21,12 +21,12 @@ import ec.gob.firmadigital.servicio.util.FirmaDigital;
 import ec.gob.firmadigital.servicio.util.JsonProcessor;
 import ec.gob.firmadigital.servicio.util.Pkcs12;
 import ec.gob.firmadigital.servicio.util.Propiedades;
-import io.rubrica.exceptions.CertificadoInvalidoException;
-import io.rubrica.exceptions.ConexionException;
-import io.rubrica.exceptions.EntidadCertificadoraNoValidaException;
-import io.rubrica.exceptions.HoraServidorException;
-import io.rubrica.exceptions.RubricaException;
-import io.rubrica.utils.X509CertificateUtils;
+import ec.gob.firmadigital.libreria.exceptions.CertificadoInvalidoException;
+import ec.gob.firmadigital.libreria.exceptions.ConexionException;
+import ec.gob.firmadigital.libreria.exceptions.EntidadCertificadoraNoValidaException;
+import ec.gob.firmadigital.libreria.exceptions.HoraServidorException;
+import ec.gob.firmadigital.libreria.exceptions.RubricaException;
+import ec.gob.firmadigital.libreria.utils.X509CertificateUtils;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
@@ -39,16 +39,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.Stateless;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Buscar en una lista de URLs permitidos para utilizar como API. Esto permite
@@ -61,12 +61,10 @@ import javax.ws.rs.core.Response;
 @Stateless
 public class ServicioAppFirmarDocumentoTransversal {
 
-    private final String REST_SERVICE_URL_PREPRODUCCION = "https://impapi.firmadigital.gob.ec/api";
-//    private final String REST_SERVICE_URL_PREPRODUCCION = "http://impapi.firmadigital.gob.ec:8080/api";
-//    private final String REST_SERVICE_URL_DESARROLLO = "http://impapi.firmadigital.gob.ec:8080/api";
-    private final String REST_SERVICE_URL_DESARROLLO = "http://impapi.firmadigital.gob.ec:8181/api";
-//    private final String REST_SERVICE_URL_DESARROLLO = "http://localhost:8080/api";
-    private final String REST_SERVICE_URL_PRODUCCION = "https://api.firmadigital.gob.ec/api";
+    private final String REST_SERVICE_URL_PREPRODUCCION = "https://impws.firmadigital.gob.ec/servicio/documentos/";
+    private final String REST_SERVICE_URL_DESARROLLO = "http://localhost:8181/servicio/documentos/";
+    private final String REST_SERVICE_URL_PRODUCCION = "http://wsmobile.firmadigital.gob.ec:8080/servicio/documentos/";
+
     private String restServiceUrl;
     private static final Logger logger = Logger.getLogger(ServicioAppFirmarDocumentoTransversal.class.getName());
 
@@ -87,9 +85,9 @@ public class ServicioAppFirmarDocumentoTransversal {
     private String cedula;
 
     public String firmarTransversal(String pkcs12, String password, String sistema,
-            String operacion, String url, String versionFirmaEC, String formatoDocumento,
-            String tokenJwt, String llx, String lly, String pagina, String tipoEstampado,
-            String razon, boolean pre, boolean des, String base64) throws Exception {
+        String operacion, String url, String versionFirmaEC, String formatoDocumento,
+        String tokenJwt, String llx, String lly, String pagina, String tipoEstampado,
+        String razon, boolean pre, boolean des, String base64) throws Exception {
         // Parametros opcionales
         this.sistema = sistema;
         this.versionFirmaEC = versionFirmaEC;
@@ -104,9 +102,10 @@ public class ServicioAppFirmarDocumentoTransversal {
         this.des = des;
         this.base64 = base64;
         ambiente();
+        System.out.println("restServiceUrl:  " + restServiceUrl);
         //en caso de ser firma descentralizada
         if (url != null) {
-            restServiceUrl = url;
+            this.restServiceUrl = url;
         }
         Map<Long, byte[]> documentosFirmados;
         try {
@@ -135,7 +134,7 @@ public class ServicioAppFirmarDocumentoTransversal {
     }
 
     private Map<Long, byte[]> firmarDocumentos(String json, String pkcs12, String password)
-            throws Exception {
+        throws Exception {
         Map<Long, byte[]> documentos = JsonProcessor.parseJsonDocumentos(json);
         Map<Long, byte[]> documentosFirmados = new HashMap<>();
         String fechaHora = JsonProcessor.parseJsonFechaHora(json);
@@ -194,7 +193,7 @@ public class ServicioAppFirmarDocumentoTransversal {
 
     private String bajarDocumentos(String tokenJwt) throws Exception {
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(restServiceUrl + "/firmadigital/" + tokenJwt);
+        WebTarget target = client.target(restServiceUrl + tokenJwt);
         Invocation.Builder builder = target.request();
         Invocation invocation = builder.buildGet();
         Response response = invocation.invoke();
@@ -207,11 +206,11 @@ public class ServicioAppFirmarDocumentoTransversal {
     }
 
     private void actualizarDocumentos(String tokenJwt, Map<Long, byte[]> documentosFirmados, String cedula)
-            throws Exception {
+        throws Exception {
         String json = JsonProcessor.buildJson(documentosFirmados, cedula);
 
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(restServiceUrl + "/firmadigital/" + tokenJwt);
+        WebTarget target = client.target(restServiceUrl + tokenJwt);
         Invocation.Builder builder = target.request();
         Form form = new Form();
         form.param("json", json);
@@ -244,9 +243,9 @@ public class ServicioAppFirmarDocumentoTransversal {
                 error = "El/Los documento(s) fueron gestionados";
             }
             if (body.contains("Token invalido")
-                    || body.contains("No se encuentran documentos")
-                    || body.contains("Error al invocar servicio de obtencion de documentos")
-                    || body.contains("Base 64 inválido")) {
+                || body.contains("No se encuentran documentos")
+                || body.contains("Error al invocar servicio de obtencion de documentos")
+                || body.contains("Base 64 inválido")) {
                 error = "No se encontraron documentos para firmar.";
             }
             if (body.contains("Cedula invalida")) {

@@ -17,23 +17,23 @@
 package ec.gob.firmadigital.servicio.rest;
 
 import ec.gob.firmadigital.servicio.ServicioVersion;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import ec.gob.firmadigital.servicio.VersionException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Base64;
 import java.util.logging.Logger;
-import javax.json.Json;
-import javax.json.JsonReader;
-import javax.json.stream.JsonParsingException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
+import jakarta.json.Json;
+import jakarta.json.JsonReader;
+import jakarta.json.stream.JsonParsingException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.POST;
 
 /**
  * Servicio REST para verificar Versión.
@@ -56,7 +56,7 @@ public class ServicioVersionRest {
         if (base64 == null || base64.isEmpty()) {
             return "Se debe generar en Base64";
         }
-        logger.info("base64=" + base64);
+//        logger.info("base64=" + base64);
         String jsonParameter;
         try {
             jsonParameter = new String(Base64.getDecoder().decode(base64));
@@ -68,10 +68,10 @@ public class ServicioVersionRest {
             return "Se debe incluir JSON con los parámetros: sistemaOperativo, aplicacion,versionApp y sha";
         }
 
-        javax.json.JsonObject json;
+        jakarta.json.JsonObject json;
         try {
             JsonReader jsonReader = Json.createReader(new StringReader(URLDecoder.decode(jsonParameter, "UTF-8")));
-            json = (javax.json.JsonObject) jsonReader.read();
+            json = (jakarta.json.JsonObject) jsonReader.read();
         } catch (JsonParsingException | UnsupportedEncodingException e) {
             return getClass().getSimpleName() + "::Error al decodificar JSON: " + e.getMessage();
         }

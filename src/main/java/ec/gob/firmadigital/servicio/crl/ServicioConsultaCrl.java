@@ -22,10 +22,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.annotation.Resource;
-import javax.ejb.EJBException;
-import javax.ejb.Stateless;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.Stateless;
 import javax.sql.DataSource;
 
 /**
@@ -43,7 +42,7 @@ public class ServicioConsultaCrl {
 
     public boolean isRevocado(BigInteger serial) {
         try (Connection conn = ds.getConnection();
-                PreparedStatement ps = conn.prepareStatement("SELECT serial FROM crl WHERE serial=?")) {
+            PreparedStatement ps = conn.prepareStatement("SELECT serial FROM crl WHERE serial=?")) {
 
             ps.setString(1, serial.toString());
 
@@ -58,7 +57,7 @@ public class ServicioConsultaCrl {
 
     public String fechaRevocado(BigInteger serial) {
         try (Connection conn = ds.getConnection();
-                PreparedStatement ps = conn.prepareStatement("SELECT fecharevocacion FROM crl WHERE serial=?")) {
+            PreparedStatement ps = conn.prepareStatement("SELECT fecharevocacion FROM crl WHERE serial=?")) {
 
             ps.setString(1, serial.toString());
 

@@ -20,14 +20,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import ec.gob.firmadigital.servicio.ServicioAppFirmarDocumento;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * REST Web Service
@@ -46,7 +46,7 @@ public class ServicioAppFirmarDocumentoRest {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String firmarDocumento(@FormParam("pkcs12") String pkcs12, @FormParam("password") String password,
-            @FormParam("documento") String documento, @FormParam("json") String json, @FormParam("base64") String base64) throws Exception {
+        @FormParam("documento") String documento, @FormParam("json") String json, @FormParam("base64") String base64) throws Exception {
 
         if (pkcs12 == null || pkcs12.isEmpty()) {
             return "Se debe incluir el parametro pkcs12";

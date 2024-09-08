@@ -17,18 +17,18 @@
  */
 package ec.gob.firmadigital.servicio.util;
 
-import io.rubrica.exceptions.HoraServidorException;
+import ec.gob.firmadigital.libreria.exceptions.HoraServidorException;
 import java.io.IOException;
 import java.util.Properties;
 
-import io.rubrica.sign.pdf.PDFSignerItext;
-import io.rubrica.sign.pdf.RectanguloUtil;
-import io.rubrica.utils.TiempoUtils;
+import ec.gob.firmadigital.libreria.sign.pdf.PDFSignerItext;
+import ec.gob.firmadigital.libreria.sign.pdf.RectanguloUtil;
+import ec.gob.firmadigital.libreria.utils.TiempoUtils;
 import java.io.StringReader;
 import java.net.URLDecoder;
 import java.util.Base64;
-import javax.json.Json;
-import javax.json.JsonReader;
+import jakarta.json.Json;
+import jakarta.json.JsonReader;
 
 public class Propiedades {
 
@@ -41,9 +41,9 @@ public class Propiedades {
             properties.setProperty(PDFSignerItext.SIGN_TIME, fechaHora);
         }
         String jsonParameter = new String(Base64.getDecoder().decode(base64));
-        javax.json.JsonObject json;
+        jakarta.json.JsonObject json;
         JsonReader jsonReader = Json.createReader(new StringReader(URLDecoder.decode(jsonParameter, "UTF-8")));
-        json = (javax.json.JsonObject) jsonReader.read();
+        json = (jakarta.json.JsonObject) jsonReader.read();
         String sistemaOperativo;
         sistemaOperativo = json.getString("sistemaOperativo");
 

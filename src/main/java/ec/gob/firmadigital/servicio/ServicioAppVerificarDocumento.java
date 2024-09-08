@@ -17,19 +17,19 @@
 package ec.gob.firmadigital.servicio;
 
 import com.itextpdf.kernel.pdf.PdfReader;
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 
-import io.rubrica.certificate.to.Documento;
-import io.rubrica.exceptions.SignatureVerificationException;
-import io.rubrica.sign.SignInfo;
-import io.rubrica.sign.Signer;
-import io.rubrica.sign.pdf.PDFSignerItext;
-import io.rubrica.utils.Json;
-import static io.rubrica.utils.Utils.pdfToDocumento;
+import ec.gob.firmadigital.libreria.certificate.to.Documento;
+import ec.gob.firmadigital.libreria.exceptions.SignatureVerificationException;
+import ec.gob.firmadigital.libreria.sign.SignInfo;
+import ec.gob.firmadigital.libreria.sign.Signer;
+import ec.gob.firmadigital.libreria.sign.pdf.PDFSignerItext;
+import ec.gob.firmadigital.libreria.utils.Json;
+import static ec.gob.firmadigital.libreria.utils.Utils.pdfToDocumento;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  *
@@ -59,12 +59,9 @@ public class ServicioAppVerificarDocumento {
         } catch (Exception ex) {
             retorno = ex.toString();
         }
-
         if (documento == null) {
             documento = new Documento(false, false, new ArrayList<>(), retorno);
         }
-
         return Json.generarJsonDocumento(documento);
     }
-
 }

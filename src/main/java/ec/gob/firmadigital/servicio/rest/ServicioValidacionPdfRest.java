@@ -20,24 +20,24 @@ package ec.gob.firmadigital.servicio.rest;
 import com.google.gson.Gson;
 
 import com.google.gson.JsonArray;
-import io.rubrica.certificate.to.Certificado;
-import io.rubrica.certificate.to.Documento;
-import io.rubrica.utils.Utils;
+import ec.gob.firmadigital.libreria.certificate.to.Certificado;
+import ec.gob.firmadigital.libreria.certificate.to.Documento;
+import ec.gob.firmadigital.libreria.utils.Utils;
 import com.google.gson.JsonObject;
 import com.itextpdf.kernel.pdf.PdfReader;
-import io.rubrica.sign.SignInfo;
-import io.rubrica.sign.Signer;
-import io.rubrica.sign.pdf.PDFSignerItext;
+import ec.gob.firmadigital.libreria.sign.SignInfo;
+import ec.gob.firmadigital.libreria.sign.Signer;
+import ec.gob.firmadigital.libreria.sign.pdf.PDFSignerItext;
 import java.io.ByteArrayInputStream;
 
-import javax.ejb.Stateless;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ejb.Stateless;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -52,7 +52,7 @@ public class ServicioValidacionPdfRest {
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response verificarPdf(String archivoBase64)
-			throws Exception {
+		throws Exception {
 		byte[] byteDocumento = java.util.Base64.getDecoder().decode(archivoBase64);
 		InputStream inputStreamDocumento = new ByteArrayInputStream(byteDocumento);
 		PdfReader pdfReader = new PdfReader(inputStreamDocumento);

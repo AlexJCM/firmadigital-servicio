@@ -1,4 +1,4 @@
-package ec.gob.firmadigital.firmaec_app.exceptions;
+package ec.gob.firmadigital.servicio.exception;
 
 import java.net.URISyntaxException;
 

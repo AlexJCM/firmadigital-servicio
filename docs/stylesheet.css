@@ -137,7 +137,7 @@ sup {
  * Styles for navigation bar.
  */
 .bar {
-    background-color:#00395A;
+    background-color:#4D7A97;
     color:#FFFFFF;
     padding:.8em .5em .4em .8em;
     height:auto;/*height:1.8em;*/
@@ -154,7 +154,7 @@ sup {
     background-color:#ffffff;
 }
 .topNav {
-    background-color:#00395A;
+    background-color:#4D7A97;
     color:#FFFFFF;
     float:left;
     padding:0;
@@ -167,7 +167,7 @@ sup {
 }
 .bottomNav {
     margin-top:10px;
-    background-color:#00395A;
+    background-color:#4D7A97;
     color:#FFFFFF;
     float:left;
     padding:0;
@@ -501,7 +501,7 @@ table tr td dl, table tr td dl dt, table tr td dl dd {
     margin-right:3px;
     display:inline-block;
     float:left;
-    background-color:#00395A;
+    background-color:#4D7A97;
     height:16px;
 }
 .memberSummary caption span.tableTab, .memberSummary caption span.activeTableTab,
@@ -539,7 +539,7 @@ table tr td dl, table tr td dl dt, table tr td dl dd {
     width:5px;
     margin-right:3px;
     position:relative;
-    background-color:#00395A;
+    background-color:#4D7A97;
     float:left;
 }
 .rowColor th, .altColor th {
@@ -750,11 +750,8 @@ main, nav, header, footer, section {
     font-weight:bold;
     font-size:15px;
     padding:7px 0 7px 3px;
-    background-color:#00395A;
+    background-color:#4D7A97;
     color:#FFFFFF;
-}
-.resultItem {
-    font-size:13px;
 }
 .ui-autocomplete {
     max-height:85%;
@@ -767,13 +764,17 @@ main, nav, header, footer, section {
 ul.ui-autocomplete {
     position:fixed;
     z-index:999999;
+    background-color: #FFFFFF;
 }
 ul.ui-autocomplete  li {
     float:left;
     clear:both;
     width:100%;
 }
-.resultHighlight {
+.ui-autocomplete .result-item {
+    font-size: inherit;
+}
+.ui-autocomplete .result-highlight {
     font-weight:bold;
 }
 #search {

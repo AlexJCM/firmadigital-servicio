@@ -18,18 +18,18 @@ package ec.gob.firmadigital.servicio;
 
 import java.util.logging.Logger;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.validation.constraints.NotNull;
 
 import ec.gob.firmadigital.servicio.model.Version;
 import ec.gob.firmadigital.servicio.util.PropertiesUtils;
-import io.rubrica.utils.OsUtils;
-import javax.ejb.EJB;
+import ec.gob.firmadigital.libreria.utils.OsUtils;
+import jakarta.ejb.EJB;
 
 /**
  * Buscar en una lista de versiones. Esto permite tener el control de los
@@ -72,29 +72,29 @@ public class ServicioVersion {
             if (version.getStatus()) {
                 retorno = "Version enabled";
                 servicioLog.info("ServicioVersion::validarVersion",
-                        "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
+                    "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
             } else {
                 retorno = "Version disabled";
                 servicioLog.warning("ServicioVersion::validarVersion",
-                        "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
+                    "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
             }
         } catch (NoResultException e) {
             retorno = "Versión no encontrado";
             logger.severe(retorno);
             servicioLog.error("ServicioVersion::validarVersion",
-                    "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
+                "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
             throw new ApiUrlNoEncontradoException(retorno);
         } catch (NonUniqueResultException e) {
             retorno = "Varias Versiones registradas";
             logger.severe(retorno);
             servicioLog.error("ServicioVersion::validarVersion",
-                    "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
+                "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
             throw new ApiUrlNoEncontradoException(retorno);
         } catch (java.lang.NullPointerException e) {
             retorno = "Revisar el estado de la URL registrada";
             logger.severe(retorno);
             servicioLog.error("ServicioVersion::validarVersion",
-                    "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
+                "sistemaOperativo " + sistemaOperativo + ", versionApp " + versionApp + ", sha" + sha + ", " + retorno);
             throw new ApiUrlNoEncontradoException(retorno);
         } finally {
             gsonObject = new com.google.gson.JsonObject();

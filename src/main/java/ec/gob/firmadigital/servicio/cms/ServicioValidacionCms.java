@@ -17,23 +17,27 @@ package ec.gob.firmadigital.servicio.cms;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ejb.Stateless;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import ec.gob.firmadigital.servicio.util.Base64InvalidoException;
 import ec.gob.firmadigital.servicio.util.Base64Util;
-import io.rubrica.exceptions.SignatureVerificationException;
-import io.rubrica.certificate.to.DatosUsuario;
-import io.rubrica.sign.cms.VerificadorCMS;
+import ec.gob.firmadigital.libreria.exceptions.SignatureVerificationException;
+import ec.gob.firmadigital.libreria.certificate.to.DatosUsuario;
+import ec.gob.firmadigital.libreria.exceptions.EntidadCertificadoraNoValidaException;
+import ec.gob.firmadigital.libreria.sign.cms.VerificadorCMS;
+import ec.gob.firmadigital.libreria.sign.pdf.BasePdfSigner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servicio de validacion de archivos CMS (P7M).
@@ -58,31 +62,35 @@ public class ServicioValidacionCms {
         }
 
         VerificadorCMS verificador = new VerificadorCMS();
-        byte[] archivoOriginal = verificador.verify(archivo);
-        String archivoOriginalBase64 = Base64Util.encode(archivoOriginal);
-
         JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-        objectBuilder.add("archivo", archivoOriginalBase64);
+        try {
+            byte[] archivoOriginal = verificador.verify(archivo);
+            String archivoOriginalBase64 = Base64Util.encode(archivoOriginal);
 
-        // Para construir un array de firmantes
-        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            objectBuilder.add("archivo", archivoOriginalBase64);
 
-        // FIXME
-        List<DatosUsuario> listaDatosUsuario = verificador.listaDatosUsuario;
+            // Para construir un array de firmantes
+            JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
-        for (DatosUsuario datosUsuario : listaDatosUsuario) {
-            JsonObjectBuilder builder = Json.createObjectBuilder();
-            builder.add("nombre", datosUsuario.getNombre());
-            builder.add("apellido", datosUsuario.getApellido());
-            builder.add("cargo", datosUsuario.getCargo());
-            builder.add("cedula", datosUsuario.getCedula());
-            builder.add("institucion", datosUsuario.getInstitucion());
-            arrayBuilder.add(builder);
+            // FIXME
+            List<DatosUsuario> listaDatosUsuario = verificador.listaDatosUsuario;
+
+            for (DatosUsuario datosUsuario : listaDatosUsuario) {
+                JsonObjectBuilder builder = Json.createObjectBuilder();
+                builder.add("nombre", datosUsuario.getNombre());
+                builder.add("apellido", datosUsuario.getApellido());
+                builder.add("cargo", datosUsuario.getCargo());
+                builder.add("cedula", datosUsuario.getCedula());
+                builder.add("institucion", datosUsuario.getInstitucion());
+                arrayBuilder.add(builder);
+            }
+
+            objectBuilder.add("firmantes", arrayBuilder.build());
+        } catch (EntidadCertificadoraNoValidaException ex) {
+            Logger.getLogger(BasePdfSigner.class.getName()).log(Level.SEVERE, null, ex);
+            objectBuilder.add("error", "Entidad Certificadora no reconocida");
         }
-
-        objectBuilder.add("firmantes", arrayBuilder.build());
         String json = objectBuilder.build().toString();
-
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
 }

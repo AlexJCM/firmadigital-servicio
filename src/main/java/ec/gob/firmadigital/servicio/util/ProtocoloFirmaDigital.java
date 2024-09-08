@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import ec.gob.firmadigital.firmaec_app.exceptions.ProtocoloInvalidoException;
+import ec.gob.firmadigital.servicio.exception.ProtocoloInvalidoException;
 
 public class ProtocoloFirmaDigital {
     private final String SISTEMA;

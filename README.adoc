@@ -9,15 +9,15 @@ Los siguientes pasos le permitirán obtener una copia del proyecto para correrla
 
 === Pre-requisitos
 
-- Open JDK 11
+- JDK 11
 
-- WildFly Application Server 26.1.1.- Para desplegar la aplicación se necesita un servidor de aplicaciones *Java EE 11* disponible en http://www.wildfly.org[wildfly.org]
+- WildFly 33.- Para desplegar la aplicación se necesita un servidor de aplicaciones *Jakarta EE 10* disponible en http://www.wildfly.org[wildfly.org]
 
 - Maven 3.- Para compilar y empaquetar se utiliza http://maven.apache.org[Apache Maven].
 
 - Postgresql 12.6 o superior
 
-- Proyecto https://github.com/alexjcm/firmadigital-libreria[firmadigital-libreria] compilado
+- Librería https://github.com/alexjcm/firmadigital-libreria[firmadigital-libreria] compilada para realizar las operaciones de firma digital.
 
 == Instalación
 
@@ -28,7 +28,7 @@ Para compilar se debe ejecutar el siguiente comando:
 mvn clean package
 ----
 
-Esto produce el WAR en _target/fservicio.war_
+Esto produce el WAR en _target/servicio.war_
 
 
 == Despliegue
@@ -46,20 +46,18 @@ Se debe generar una llave a través de la clase `token/jwt/ServicioTokenJwt.java
 <management>
 ----
 
-Se debe comentar el siguiente código dentro de la clase `crl/ServicioDescargaCrl.java` para generar el compilado que no realice descargas de CRL
-
-[source, java]
-----
-@PostConstruct
-public void init() {
-	crearTablaSiNoExiste();
-	importarCrls();
-}
-----
-
-Después de este proceso, se descomentará y se generará otro compilado para el servidor que realice las descargas de CRL
-
 == Desarrollo
+
+Iniciar el servidor WildFly:
+
+[source, bash]
+----
+/opt/wildfly-33.0.1.Final/bin/standalone.sh
+----
+
+=== Configurar base de datos
+
+*Opción 1:*
 
 Para facilitar el desarrollo se puede utilizar Docker. Se puede instalar las dependencias de infraestructura, como la base de datos, utilizando contenedores. Por ejemplo, para ejecutar un servidor PostgreSQL 12, se puede ejecutar:
 
@@ -68,7 +66,35 @@ Para facilitar el desarrollo se puede utilizar Docker. Se puede instalar las dep
 docker run -d --name postgresql_firmadigital -e POSTGRESQL_USER=firmadigital -e POSTGRESQL_PASSWORD=firmadigital -e POSTGRESQL_DATABASE=firmadigital -p 5432:5432 centos/postgresql-12-centos7
 ----
 
-Se necesita un registro en la tabla "sistema" para poder probar, para lo cual primero generamos un hash SHA256 utilizando cualquiera de las siguientes dos opciones:
+*Opción 2:*
+
+Instalar Postgresql localmente.
+
+
+Para configurar el DataSource de PostgreSQL que apunta al contenedor, en WildFly se puede ejecutar el siguiente script para JBoss CLI:
+
+Ejecutar `bin/jboss-cli.sh -c` y luego el siguiente script:
+
+[source, bash]
+----
+batch
+module add --name=org.postgresql --resources=/home/Downloads/postgresql-42.2.13.jar --dependencies=javax.api,javax.transaction.api
+
+/subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-xa-datasource-class-name=org.postgresql.xa.PGXADataSource)
+
+data-source add --name=FirmaDigitalDS --jndi-name=java:/FirmaDigitalDS --driver-name=postgresql --connection-url=jdbc:postgresql://localhost:5432/firmadigital --user-name=firmadigital --password=firmadigital --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter
+
+run-batch
+----
+
+=== Despliegue de servicio
+
+Copiar el archivo servicio.war generado anteriormente en el directorio /opt/wildfly-33.0.1.Final/standalone/deployments/
+
+Al desplegar dicho archivo se crearán las tablas necesarias automaticamente.
+
+
+Se necesita un registro en la tabla "sistema" para poder probar, para lo cual primero generamos un hash SHA256 utilizando cualquiera de las siguientes opciones:
 
 *Opción 1:*
 
@@ -102,22 +128,20 @@ SET url = 'http://localhost:7776/recepcion/receiveDocument/saveSignedFile',
 WHERE id = 1;
 ----
 
-Para configurar el DataSource de PostgreSQL que apunta al contenedor, en WildFly se puede ejecutar el siguiente script para JBoss CLI:
+=== Nota
 
-Ejecutar `bin/jboss-cli.sh -c` y luego el siguiente script:
+Se debe comentar el siguiente código dentro de la clase `crl/ServicioDescargaCrl.java` para generar el compilado que no realice descargas de CRL
 
-[source, bash]
+[source, java]
 ----
-batch
-module add --name=org.postgresql --resources=/home/Downloads/postgresql-42.2.13.jar --dependencies=javax.api,javax.transaction.api
-
-/subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-xa-datasource-class-name=org.postgresql.xa.PGXADataSource)
-
-data-source add --name=FirmaDigitalDS --jndi-name=java:/FirmaDigitalDS --driver-name=postgresql --connection-url=jdbc:postgresql://localhost:5432/firmadigital --user-name=firmadigital --password=firmadigital --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter
-
-run-batch
+@PostConstruct
+public void init() {
+	crearTablaSiNoExiste();
+	importarCrls();
+}
 ----
 
+Después de este proceso, se descomentará y se generará otro compilado para el servidor que realice las descargas de CRL
 
 == Versiones
 
@@ -127,6 +151,15 @@ Usamos http://semver.org[SemVer] para versionar.
 == Documentación
 
 https://alexjcm.github.io/firmadigital-servicio[Ver documentación]
+
+== Cambios
+
+Se ha realizado pequeños ajustes en las siguientes clases java del proyecto:
+- ServicioDescargaCrl
+- TokenTimeout
+- ServicioDocumento
+- ServicioEliminacionDocumento
+- ServicioSistemaTransversal
 
 == Autores
 

@@ -17,22 +17,22 @@
 package ec.gob.firmadigital.servicio.rest;
 
 import ec.gob.firmadigital.servicio.ApiUrlNoEncontradoException;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import ec.gob.firmadigital.servicio.ServicioApiUrl;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Base64;
 import java.util.logging.Logger;
-import javax.json.Json;
-import javax.json.JsonReader;
-import javax.json.stream.JsonParsingException;
+import jakarta.json.Json;
+import jakarta.json.JsonReader;
+import jakarta.json.stream.JsonParsingException;
 
 /**
  * Servicio REST para verificar si existe un API URL.
@@ -60,10 +60,10 @@ public class ServicioApiUrlRest {
             return "Se debe incluir JSON con los parámetros: sistema, fecha_desde y fecha_hasta";
         }
 
-        javax.json.JsonObject json;
+        jakarta.json.JsonObject json;
         try {
             JsonReader jsonReader = Json.createReader(new StringReader(URLDecoder.decode(jsonParameter, "UTF-8")));
-            json = (javax.json.JsonObject) jsonReader.read();
+            json = (jakarta.json.JsonObject) jsonReader.read();
         } catch (JsonParsingException | UnsupportedEncodingException e) {
             return getClass().getSimpleName() + "::Error al decodificar JSON: \"" + e.getMessage();
         }

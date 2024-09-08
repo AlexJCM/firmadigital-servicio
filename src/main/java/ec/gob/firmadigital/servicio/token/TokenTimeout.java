@@ -25,38 +25,11 @@ import java.util.Date;
 public class TokenTimeout {
 
     /**
-     * Minutos antes de que el Token expire. 5 minutos. También representa el número de munutos que
-     * pasan antes de que se eliminen los documentos que no han sido firmados de la BD por 5
-     * minutos.
-     */
-    public static final int DEFAULT_TIMEOUT_MINUTES = 5;
-
-    /**
      * Horas antes de que el Token expire. 336 horas == 2 semanas. También representa el número de
      * horas que pasan antes de que se eliminen los documentos que no han sido firmados de la BD por
      * n horas.
      */
     public static final int DEFAULT_TIMEOUT_HOURS = 336;
-
-    /**
-     * Indica si es el ambiente de producción o de pruebas. Es utilizado par definir el tiempo en
-     * que se elimina documentos sin firmar y para establecer el tiempo de expiración del token.
-     * true = es ambiente produccion
-     * false = es ambiente de pruebas
-     */
-    public static final Boolean IS_PRODUCTION = true;
-
-    /**
-     * Agregar una cantidad de minutos a una hora dada.
-     *
-     * @param date
-     * @param minutes
-     * @return
-     */
-    public static Date addMinutes(Date date, int minutes) {
-        long time = date.getTime() + (minutes * 60 * 1000);
-        return new Date(time);
-    }
 
     /**
      * Agregar una cantidad de horas a una hora dada.

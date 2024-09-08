@@ -16,30 +16,31 @@
 package ec.gob.firmadigital.servicio;
 
 import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT_HOURS;
-import static ec.gob.firmadigital.servicio.token.TokenTimeout.DEFAULT_TIMEOUT_MINUTES;
-import static ec.gob.firmadigital.servicio.token.TokenTimeout.IS_PRODUCTION;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.EJBException;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.ejb.TimerService;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.Schedule;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.ejb.TimerService;
 import javax.sql.DataSource;
 
 /**
- * Servicio para eliminar documentos de la base de datos que no han sido firmados por n minutos o n
- * horas.
+ * Servicio para eliminar documentos de la base de datos que no han sido
+ * firmados por n horas.
  *
  * @author Ricardo Arguello <ricardo.arguello@soportelibre.com>
  */
 @Singleton
+//GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
 @Startup
+//GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
 public class ServicioEliminacionDocumento {
 
     @Resource
@@ -49,14 +50,13 @@ public class ServicioEliminacionDocumento {
     private DataSource ds;
 
     private static final Logger logger = Logger.getLogger(ServicioEliminacionDocumento.class.getName());
+
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
     @PostConstruct
     public void init() {
         borrarDocumentos();
     }
 
-    //To run every n minutes
-    //@Schedule(hour = "*", minute = "*/" + DEFAULT_TIMEOUT_MINUTES, persistent = false)
     //To run on every Monday at 9 am
     @Schedule(dayOfWeek = "Mon", hour = "9", persistent = false)
     //GRANJA DE SERVIDORES EN PRODUCCION - COMENTAR EVITAR ELIMINAR DOCUMENTOS
@@ -67,15 +67,9 @@ public class ServicioEliminacionDocumento {
         try {
             conn = ds.getConnection();
             st = conn.createStatement();
-            int n = 0;
-            if (Boolean.TRUE.equals(IS_PRODUCTION)) {
-                logger.info("Borrando documentos de hace mas de " + DEFAULT_TIMEOUT_HOURS + " horas...");
-                n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + DEFAULT_TIMEOUT_HOURS + " hours'");
-            } else {
-                logger.info("Borrando documentos de hace mas de " + DEFAULT_TIMEOUT_MINUTES + " minutos...");
-                n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + DEFAULT_TIMEOUT_MINUTES + " minutes'");
-            }
 
+            logger.info("Borrando documentos de hace mas de " + DEFAULT_TIMEOUT_HOURS + " horas...");
+            int n = st.executeUpdate("DELETE FROM documento WHERE fecha < NOW() - INTERVAL '" + DEFAULT_TIMEOUT_HOURS + " hours'");
             logger.info("Registros eliminados: " + n);
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error al borrar documentos", e);

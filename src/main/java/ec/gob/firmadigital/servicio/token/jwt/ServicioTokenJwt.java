@@ -20,11 +20,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
 
 import ec.gob.firmadigital.servicio.token.ServicioToken;
 import ec.gob.firmadigital.servicio.token.TokenExpiradoException;
@@ -41,8 +41,8 @@ import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.crypto.MacProvider;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
+import jakarta.ejb.Lock;
+import jakarta.ejb.LockType;
 
 /**
  * Servicio para trabajar con tokens tipo JWT (https://jwt.io).
@@ -97,7 +97,7 @@ public class ServicioTokenJwt implements ServicioToken {
                 return;
             } catch (Throwable e) {
                 LOGGER.log(Level.SEVERE,
-                        "ERROR: No se pudo crear una llave secreta a partir de la propiedad \"jwt.key\"", e);
+                    "ERROR: No se pudo crear una llave secreta a partir de la propiedad \"jwt.key\"", e);
             }
         }
 
@@ -126,7 +126,7 @@ public class ServicioTokenJwt implements ServicioToken {
     public String generarToken(Map<String, Object> parametros, Date expiracion) {
         Claims claims = new DefaultClaims(parametros);
         return Jwts.builder().setClaims(claims).signWith(DEFAULT_SIGNATURE_ALGORITHM, secretKey)
-                .setExpiration(expiracion).compact();
+            .setExpiration(expiracion).compact();
     }
 
     /**

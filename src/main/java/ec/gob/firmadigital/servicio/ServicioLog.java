@@ -15,11 +15,11 @@
  */
 package ec.gob.firmadigital.servicio;
 
-import javax.ejb.Stateful;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.Stateful;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import ec.gob.firmadigital.servicio.model.Log;
 import ec.gob.firmadigital.servicio.model.Log.Severidad;

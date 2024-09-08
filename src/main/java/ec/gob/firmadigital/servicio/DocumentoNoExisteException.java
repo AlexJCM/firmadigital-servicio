@@ -15,7 +15,7 @@
  */
 package ec.gob.firmadigital.servicio;
 
-import javax.ejb.ApplicationException;
+import jakarta.ejb.ApplicationException;
 
 /**
  * Excepcion arrojada en caso de problemas al almacenar el documento en el
