@@ -19,26 +19,18 @@ Los siguientes pasos le permitirán obtener una copia del proyecto para correrla
 
 - Librería https://github.com/alexjcm/firmadigital-libreria[firmadigital-libreria] compilada para realizar las operaciones de firma digital.
 
-== Instalación
-
-Para compilar se debe ejecutar el siguiente comando:
-
-[source, bash]
-----
-mvn clean package
-----
-
-Esto produce el WAR en _target/servicio.war_
+- Servicio web https://github.com/alexjcm/certificacion-electronica-documentos[certificacion-electronica-documentos] para recepción temporal de documentos firmados.
 
 
-== Despliegue
+== Configuración inicial
 
-== Balanceo de carga
-
-Se debe generar una llave a través de la clase `token/jwt/ServicioTokenJwt.java y el resultado configurarlo dentro del archivo de configuración Wildfly en la siguiente sección
+Generar una llave JWT ejecutando la clase `token/jwt/ServicioTokenJwt.java y el resultado
+configurarlo en el archivo de configuración `/opt/wildfly/standalone/configuration/standalone.xml`
+en la siguiente sección:
 
 [source, xml]
 ----
+...
 </extensions>
 <system-properties>
 	<property name="jwt.key" value="value="tYdX9if......=="/>
@@ -46,20 +38,18 @@ Se debe generar una llave a través de la clase `token/jwt/ServicioTokenJwt.java
 <management>
 ----
 
-== Desarrollo
-
 Iniciar el servidor WildFly:
 
 [source, bash]
 ----
-/opt/wildfly-33.0.1.Final/bin/standalone.sh
+/opt/wildfly/bin/standalone.sh
 ----
 
 === Configurar base de datos
 
 *Opción 1:*
 
-Para facilitar el desarrollo se puede utilizar Docker. Se puede instalar las dependencias de infraestructura, como la base de datos, utilizando contenedores. Por ejemplo, para ejecutar un servidor PostgreSQL 12, se puede ejecutar:
+Se puede utilizar Docker. Por ejemplo, para ejecutar un servidor PostgreSQL 12, se puede ejecutar:
 
 [source, bash]
 ----
@@ -71,13 +61,28 @@ docker run -d --name postgresql_firmadigital -e POSTGRESQL_USER=firmadigital -e 
 Instalar Postgresql localmente.
 
 
-Para configurar el DataSource de PostgreSQL que apunta al contenedor, en WildFly se puede ejecutar el siguiente script para JBoss CLI:
+Descargar:
 
-Ejecutar `bin/jboss-cli.sh -c` y luego el siguiente script:
+[source, bash]
+----
+sudo wget https://jdbc.postgresql.org/download/postgresql-42.2.13.jar
+---
+
+Iniciar el servidor Wildfly:
+
+[source, bash]
+----
+/opt/wildfly/bin/standalone.sh
+---
+
+Para configurar el DataSource de PostgreSQL que apunta al contenedor, en WildFly ejecutar el siguiente script para JBoss CLI:
+
+Ejecutar `/opt/wildfly/bin/jboss-cli.sh -c` y luego el siguiente script:
 
 [source, bash]
 ----
 batch
+
 module add --name=org.postgresql --resources=/home/Downloads/postgresql-42.2.13.jar --dependencies=javax.api,javax.transaction.api
 
 /subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-xa-datasource-class-name=org.postgresql.xa.PGXADataSource)
@@ -87,23 +92,45 @@ data-source add --name=FirmaDigitalDS --jndi-name=java:/FirmaDigitalDS --driver-
 run-batch
 ----
 
-=== Despliegue de servicio
+=== Despliegue
 
-Copiar el archivo servicio.war generado anteriormente en el directorio /opt/wildfly-33.0.1.Final/standalone/deployments/
+Compilar ejecutando el siguiente comando:
+
+[source, bash]
+----
+mvn clean package
+----
+
+Esto produce el WAR en _target/servicio.war_ el cual debe ser copiado en el directorio `/opt/wildfly/standalone/deployments/`
 
 Al desplegar dicho archivo se crearán las tablas necesarias automaticamente.
 
 
-Se necesita un registro en la tabla "sistema" para poder probar, para lo cual primero generamos un hash SHA256 utilizando cualquiera de las siguientes opciones:
+=== Creación de apiKey
+
+Se necesita un registro en la tabla "sistema" para poder probar, para lo cual primero generamos
+un hash SHA256 utilizando cualquiera de las siguientes opciones:
 
 *Opción 1:*
+
+MacOS:
+
+[source, bash]
+----
+export API_KEY=$(openssl rand -base64 32 | shasum -a 256 | cut -d' ' -f1)
+echo "El API-KEY a utilizar es: $API_KEY"
+export API_KEY_HASH=$(echo -n $API_KEY | shasum -a 256 | cut -d' ' -f1)
+echo "El hash SHA-256 del API-KEY a insertar en la base de datos es: $API_KEY_HASH"
+----
+
+Linux:
 
 [source, bash]
 ----
 export API_KEY=$(pwgen 32 -1 | sha256sum | cut -d' ' -f1)
-echo "El API-KEY a utilizar es $API_KEY"
+echo "El API-KEY a utilizar es: $API_KEY"
 export API_KEY_HASH=$(echo -n $API_KEY | sha256sum | cut -d' ' -f1)
-echo "El HASH-256 del API-KEY, a insertar en la base de datos, es $API_KEY_HASH"
+echo "El hash SHA-256 del API-KEY a insertar en la base de datos es: $API_KEY_HASH"
 ----
 
 *Opción 2:*
@@ -111,37 +138,16 @@ echo "El HASH-256 del API-KEY, a insertar en la base de datos, es $API_KEY_HASH"
 https://hash.online-convert.com/es/generador-sha256
 
 
-En la tabla "sistema" de la base de datos se debería insertar el hash generado (Para el ambiente de DESARROLLO o PRODUCCION):
+*Guardar apiKey*
+
+En la tabla "sistema" de la base de datos se debería insertar el hash generado:
 
 [source, sql]
 ----
-# Para crear:
-INSERT INTO sistema(id, url, apikey, apikeyrest, descripcion, nombre) VALUES (1, 'http://localhost:7776/recepcion/receiveDocument/saveSignedFile', '$API_KEY_HASH', '$API_KEY_HASH', 'Módulo de certificación electrónica', 'mce');
-
-# Para actualizar:
-UPDATE sistema
-SET url = 'http://localhost:7776/recepcion/receiveDocument/saveSignedFile',
-  apikey = '$API_KEY_HASH',
-  apikeyrest = '$API_KEY_HASH',
-  descripcion = 'Módulo de certificación electrónica',
-  nombre = 'mce'
-WHERE id = 1;
+INSERT INTO sistema(id, url, apikey, apikeyrest, descripcion, nombre)
+VALUES (1, 'http://localhost:7776/recepcion/receiveDocument/saveSignedFile', '$API_KEY_HASH', '$API_KEY_HASH', 'Módulo de certificación electrónica', 'mce');
 ----
 
-=== Nota
-
-Se debe comentar el siguiente código dentro de la clase `crl/ServicioDescargaCrl.java` para generar el compilado que no realice descargas de CRL
-
-[source, java]
-----
-@PostConstruct
-public void init() {
-	crearTablaSiNoExiste();
-	importarCrls();
-}
-----
-
-Después de este proceso, se descomentará y se generará otro compilado para el servidor que realice las descargas de CRL
 
 == Versiones
 
