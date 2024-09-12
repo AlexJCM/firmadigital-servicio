@@ -47,7 +47,7 @@ Instalar Postgresql localmente.
 [source, bash]
 ----
 sudo wget https://jdbc.postgresql.org/download/postgresql-42.2.13.jar
----
+----
 
 2. Generar una llave JWT ejecutando la clase `token/jwt/ServicioTokenJwt.java`, y el resultado
 configurarlo en el archivo `/opt/wildfly/standalone/configuration/standalone.xml`
@@ -67,7 +67,7 @@ en la siguiente sección:
 [source, bash]
 ----
 /opt/wildfly/bin/standalone.sh
----
+----
 
 4. Configurar datasource
 
